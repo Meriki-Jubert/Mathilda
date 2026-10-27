@@ -1,0 +1,8 @@
+{
+  "name": "Mathilda",
+  "description": "Discrete Mathematics Learning App with AI Chatbot and Skill Tree",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
