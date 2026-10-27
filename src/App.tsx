@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react';
 import { curriculum } from './data/curriculum';
 import { useProgress } from './hooks/useProgress';
+import { useAIConfig } from './hooks/useAIConfig';
 import LearningTree from './components/LearningTree';
 import SkillHub from './components/SkillHub';
 import LessonView from './components/LessonView';
 import PracticeView from './components/PracticeView';
 import AIChatbot from './components/AIChatbot';
 import WelcomeScreen from './components/WelcomeScreen';
+import SettingsPanel from './components/SettingsPanel';
 
 type View = 'welcome' | 'tree' | 'skill-hub' | 'lesson' | 'practice';
 
@@ -27,8 +29,10 @@ function App() {
     getSkillMastery,
   } = useProgress();
 
+  const { config: aiConfig, updateConfig: updateAIConfig, isAIEnabled } = useAIConfig();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const [viewState, setViewState] = useState<ViewState>(() => {
-    // If user has progress, skip welcome
     const hasProgress = localStorage.getItem('math-mastery-progress');
     return { view: hasProgress ? 'tree' : 'welcome' };
   });
@@ -70,13 +74,11 @@ function App() {
     if (viewState.skillId) {
       completePractice(viewState.skillId, questionId);
       
-      // Check if all practice questions are now complete
       const skill = findSkill(viewState.unitId!, viewState.skillId);
       if (skill) {
         const skillProg = progress.skillProgress[viewState.skillId];
         const completedCount = (skillProg?.practiceCompleted.length || 0) + 1;
         if (completedCount >= skill.practice.length) {
-          // All practice complete - unlock the skill
           unlockSkill(viewState.skillId);
         }
       }
@@ -91,7 +93,6 @@ function App() {
     setViewState(prev => ({ ...prev, view: 'skill-hub', lessonId: undefined }));
   };
 
-  // Get current topic for AI chatbot context
   const getCurrentTopic = () => {
     if (viewState.unitId && viewState.skillId) {
       const skill = findSkill(viewState.unitId, viewState.skillId);
@@ -108,7 +109,6 @@ function App() {
     return '';
   };
 
-  // Render based on current view
   const renderView = () => {
     switch (viewState.view) {
       case 'welcome':
@@ -187,13 +187,35 @@ function App() {
 
   return (
     <div className="relative">
+      {/* Settings Button (visible on all non-welcome pages) */}
+      {viewState.view !== 'welcome' && (
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="fixed top-4 right-4 z-40 p-3 bg-white rounded-full shadow-md hover:shadow-lg border border-gray-200 transition-all hover:scale-105"
+          title="AI Settings"
+        >
+          <span className="text-lg">⚙️</span>
+        </button>
+      )}
+
       {renderView()}
+
       {viewState.view !== 'welcome' && (
         <AIChatbot
           currentTopic={getCurrentTopic()}
           currentUnit={getCurrentUnitTitle()}
+          config={aiConfig}
+          isAIEnabled={isAIEnabled}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
       )}
+
+      <SettingsPanel
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        config={aiConfig}
+        onSave={updateAIConfig}
+      />
     </div>
   );
 }

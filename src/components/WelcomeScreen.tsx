@@ -24,25 +24,31 @@ export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
         </p>
         <p className="text-white/60 mb-10 max-w-md mx-auto">
           Learn math the way it should be taught — with real-life examples, 
-          step-by-step explanations, and an AI tutor by your side.
+          step-by-step explanations, and a real AI tutor powered by your choice of 
+          <span className="text-white/80 font-medium"> HuggingFace, OpenAI, Anthropic, Google, or OpenRouter</span>.
         </p>
 
         {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
             <span className="text-3xl mb-2 block">📚</span>
-            <p className="text-white text-sm font-medium">7 Units of Content</p>
-            <p className="text-white/60 text-xs mt-1">From basics to advanced</p>
+            <p className="text-white text-sm font-medium">7 Units</p>
+            <p className="text-white/60 text-xs mt-1">Basics → Advanced</p>
           </div>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
             <span className="text-3xl mb-2 block">🤖</span>
-            <p className="text-white text-sm font-medium">AI Math Tutor</p>
-            <p className="text-white/60 text-xs mt-1">Always here to help</p>
+            <p className="text-white text-sm font-medium">Your AI Key</p>
+            <p className="text-white/60 text-xs mt-1">Use your own API</p>
           </div>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-            <span className="text-3xl mb-2 block">📸</span>
-            <p className="text-white text-sm font-medium">Snap & Solve</p>
-            <p className="text-white/60 text-xs mt-1">Photo your answers</p>
+            <span className="text-3xl mb-2 block">👁️</span>
+            <p className="text-white text-sm font-medium">Vision AI</p>
+            <p className="text-white/60 text-xs mt-1">Reads your handwriting</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+            <span className="text-3xl mb-2 block">🔓</span>
+            <p className="text-white text-sm font-medium">Unlock Path</p>
+            <p className="text-white/60 text-xs mt-1">Progressive learning</p>
           </div>
         </div>
 

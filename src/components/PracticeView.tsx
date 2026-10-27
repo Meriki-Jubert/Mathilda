@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { FiArrowLeft, FiCheck, FiX, FiCamera, FiHelpCircle, FiArrowRight } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiArrowLeft, FiCheck, FiX, FiHelpCircle, FiArrowRight, FiMessageCircle } from 'react-icons/fi';
 import { PracticeQuestion } from '../data/curriculum';
 
 interface PracticeViewProps {
@@ -18,9 +18,6 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
   const [isCorrect, setIsCorrect] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const question = questions[currentQ];
   const isAlreadyCompleted = completedQuestions.includes(question.id);
@@ -77,31 +74,8 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
       setShowResult(false);
       setShowHint(false);
       setShowExplanation(false);
-      setCapturedImage(null);
     } else {
       onBack();
-    }
-  };
-
-  const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageData = event.target?.result as string;
-        setCapturedImage(imageData);
-        // Simulate OCR processing - in production, this would use a real OCR API
-        // The AI bot will analyze the image and extract the answer
-        setUserAnswer('');
-        
-        // Simulate AI processing delay then provide feedback
-        setTimeout(() => {
-          setCapturedImage(null);
-          // Show a message that the image was processed
-          alert('📸 Image captured! In a full version, our AI would read your handwritten answer here. For now, please type your answer below.');
-        }, 1500);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -209,49 +183,9 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
                     : 'border-gray-200 focus:border-purple-400'
                 }`}
               />
-
-              {/* Image Input Options */}
-              <div className="flex gap-3">
-                <button
-                  onClick={() => cameraInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors text-sm"
-                >
-                  <FiCamera size={16} /> Snap Answer
-                </button>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors text-sm"
-                >
-                  📎 Upload Image
-                </button>
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleImageCapture}
-                  className="hidden"
-                />
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageCapture}
-                  className="hidden"
-                />
-              </div>
-
-              {/* Captured Image Preview */}
-              {capturedImage && (
-                <div className="relative rounded-xl overflow-hidden border-2 border-purple-300">
-                  <img src={capturedImage} alt="Captured answer" className="w-full max-h-48 object-contain bg-gray-50" />
-                  <div className="absolute inset-0 bg-purple-600/10 flex items-center justify-center">
-                    <span className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium animate-pulse">
-                      🤖 AI Processing...
-                    </span>
-                  </div>
-                </div>
-              )}
+              <p className="text-xs text-gray-400">
+                💡 Tip: You can also snap a photo of your handwritten answer and send it to the AI tutor (🤖 button bottom-right)
+              </p>
             </div>
           )}
         </div>
@@ -307,6 +241,12 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
             <p className="text-blue-800 text-sm">
               📖 <strong>Explanation:</strong> {question.explanation}
             </p>
+            {!isCorrect && (
+              <p className="text-blue-600 text-xs mt-2 flex items-center gap-1">
+                <FiMessageCircle size={12} />
+                Ask the AI tutor for a deeper explanation of this concept!
+              </p>
+            )}
           </div>
         )}
 
