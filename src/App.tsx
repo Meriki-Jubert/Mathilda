@@ -11,8 +11,11 @@ import AIChatbot from './components/AIChatbot';
 import WelcomeScreen from './components/WelcomeScreen';
 import SettingsPanel from './components/SettingsPanel';
 import WeeklyReportView from './components/WeeklyReport';
+import HndExamBankView from './components/HndExamBankView';
+import HndFormulaSheetView from './components/HndFormulaSheetView';
+import HndSolversView from './components/HndSolversView';
 
-type View = 'welcome' | 'tree' | 'skill-hub' | 'lesson' | 'practice';
+type View = 'welcome' | 'tree' | 'skill-hub' | 'lesson' | 'practice' | 'hnd-exams' | 'hnd-formulas' | 'hnd-solvers';
 
 interface ViewState {
   view: View;
@@ -271,6 +274,15 @@ function App() {
         );
       }
 
+      case 'hnd-exams':
+        return <HndExamBankView onBack={handleBackToTree} />;
+
+      case 'hnd-formulas':
+        return <HndFormulaSheetView onBack={handleBackToTree} />;
+
+      case 'hnd-solvers':
+        return <HndSolversView onBack={handleBackToTree} />;
+
       default:
         return null;
     }
@@ -290,19 +302,80 @@ function App() {
 
   return (
     <div className="relative">
+      {/* Top Header Navigation for Cameroon HND Maths */}
+      {viewState.view !== 'welcome' && (
+        <header className="sticky top-0 z-30 bg-slate-900 text-slate-100 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleBackToTree}
+              className="text-sm font-bold tracking-tight hover:text-emerald-400 transition-colors flex items-center gap-2"
+            >
+              <span className="text-lg">🇨🇲</span>
+              <span className="hidden sm:inline font-extrabold text-white">Cameroon HND Math Mastery</span>
+            </button>
+          </div>
+
+          <nav className="flex items-center gap-1 sm:gap-2">
+            <button
+              onClick={() => setViewState({ view: 'tree' })}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewState.view === 'tree' || viewState.view === 'skill-hub' || viewState.view === 'lesson' || viewState.view === 'practice'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              🌳 Curriculum
+            </button>
+
+            <button
+              onClick={() => setViewState({ view: 'hnd-exams' })}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewState.view === 'hnd-exams'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              📜 Exam Bank
+            </button>
+
+            <button
+              onClick={() => setViewState({ view: 'hnd-formulas' })}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewState.view === 'hnd-formulas'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              📐 Formulas
+            </button>
+
+            <button
+              onClick={() => setViewState({ view: 'hnd-solvers' })}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                viewState.view === 'hnd-solvers'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              🧮 Solvers
+            </button>
+          </nav>
+        </header>
+      )}
+
       {/* Settings & Report Buttons */}
       {viewState.view !== 'welcome' && (
-        <div className="fixed top-4 right-4 z-40 flex gap-2">
+        <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2">
           <button
             onClick={() => setReportOpen(true)}
-            className="p-3 bg-white rounded-full shadow-md hover:shadow-lg border border-gray-200 transition-all hover:scale-105"
-            title="Weekly Report"
+            className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl border border-gray-200 transition-all hover:scale-105"
+            title="Weekly Analytics Report"
           >
             <span className="text-lg">📊</span>
           </button>
           <button
             onClick={() => setSettingsOpen(true)}
-            className="p-3 bg-white rounded-full shadow-md hover:shadow-lg border border-gray-200 transition-all hover:scale-105"
+            className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl border border-gray-200 transition-all hover:scale-105"
             title="AI Settings"
           >
             <span className="text-lg">⚙️</span>

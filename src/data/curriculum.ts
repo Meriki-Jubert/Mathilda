@@ -1302,5 +1302,427 @@ export const curriculum: Unit[] = [
         ]
       }
     ]
+  },
+  {
+    id: 'unit-8',
+    number: 8,
+    title: 'Complex Numbers (HND Core)',
+    icon: '🔮',
+    goal: 'Master imaginary numbers, polar coordinates, and De Moivre\'s Theorem for electrical and mechanical HND exams.',
+    skills: [
+      {
+        id: 'skill-8.1',
+        title: 'Rectangular Form (a + bi)',
+        description: 'Adding, subtracting, multiplying, and dividing complex numbers',
+        lessons: [
+          {
+            id: 'lesson-8.1.1',
+            title: 'The Imaginary Unit i',
+            explanation: 'In real numbers, √(-1) has no solution. We define i = √(-1) so that i² = -1. A complex number z = a + bi has a real part Re(z) = a and an imaginary part Im(z) = b. To divide complex numbers, multiply top and bottom by the complex conjugate (a - bi).',
+            everydayExample: 'Think of 2D movement on a map. Real numbers move you east-west along the x-axis. Imaginary numbers move you north-south along the y-axis. A complex number a + bi describes your exact coordinate (a, b) on the Argand plane!',
+            keyConcept: 'i² = -1. Conjugate of (a + bi) is (a - bi). (a + bi)(a - bi) = a² + b².',
+            formula: 'z = a + bi,  z̄ = a - bi',
+            workedExample: {
+              problem: 'Divide: (3 + 2i) / (1 - i)',
+              steps: [
+                'Multiply numerator and denominator by conjugate of denominator (1 + i)',
+                'Top: (3 + 2i)(1 + i) = 3 + 3i + 2i + 2i² = 3 + 5i - 2 = 1 + 5i',
+                'Bottom: (1 - i)(1 + i) = 1 - i² = 1 - (-1) = 2',
+                'Result: (1 + 5i) / 2 = 1/2 + (5/2)i'
+              ],
+              answer: '1/2 + 2.5i'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-8.1.1',
+            question: 'What is i² + i⁴ ?',
+            type: 'text',
+            correctAnswer: '0',
+            hint: 'i² = -1, i⁴ = (i²)² = (-1)² = 1.',
+            explanation: 'i² = -1 and i⁴ = 1. So -1 + 1 = 0.'
+          },
+          {
+            id: 'pq-8.1.2',
+            question: 'Multiply: (2 + 3i)(1 - 2i)',
+            type: 'text',
+            correctAnswer: '8-i',
+            hint: 'Expand using FOIL: 2(1) - 4i + 3i - 6i². Remember i² = -1.',
+            explanation: '2 - 4i + 3i - 6(-1) = 2 - i + 6 = 8 - i.'
+          }
+        ]
+      },
+      {
+        id: 'skill-8.2',
+        title: 'Polar Form & De Moivre\'s Theorem',
+        description: 'Converting to r∠θ and raising complex numbers to powers zⁿ',
+        lessons: [
+          {
+            id: 'lesson-8.2.1',
+            title: 'Modulus, Argument & De Moivre',
+            explanation: 'A complex number z = a + bi can be written in polar form z = r(cos θ + i sin θ) = re^(iθ), where modulus r = √(a² + b²) and argument θ = tan⁻¹(b/a). De Moivre\'s Theorem states that zⁿ = rⁿ[cos(nθ) + i sin(nθ)]. This makes raising complex numbers to high powers ridiculously easy!',
+            everydayExample: 'In AC circuit analysis (HND Electrical Engineering), voltage and current are phasors. Multiplying phasors multiplies their magnitudes (r) and adds their phase angles (θ). De Moivre\'s theorem is the backbone of AC power analysis!',
+            keyConcept: 'De Moivre: [r(cos θ + i sin θ)]ⁿ = rⁿ[cos(nθ) + i sin(nθ)].',
+            formula: 'r = √(a² + b²),  θ = arctan(b/a)',
+            workedExample: {
+              problem: 'Evaluate (1 + i)⁸ using De Moivre\'s Theorem.',
+              steps: [
+                'Find r for 1 + i: r = √(1² + 1²) = √2',
+                'Find θ for 1 + i: θ = tan⁻¹(1/1) = π/4 (45°)',
+                'Apply De Moivre: (√2)⁸ [cos(8 × π/4) + i sin(8 × π/4)]',
+                '(√2)⁸ = 2⁴ = 16',
+                'cos(2π) + i sin(2π) = 1 + 0i = 1',
+                'Answer: 16 × 1 = 16'
+              ],
+              answer: '16'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-8.2.1',
+            question: 'Find the modulus r of z = 3 + 4i.',
+            type: 'text',
+            correctAnswer: '5',
+            hint: 'r = √(a² + b²) = √(3² + 4²)',
+            explanation: 'r = √(9 + 16) = √25 = 5.'
+          },
+          {
+            id: 'pq-8.2.2',
+            question: 'Using De Moivre\'s theorem, if z = 2(cos 30° + i sin 30°), what is z³ in rectangular form?',
+            type: 'text',
+            correctAnswer: '8i',
+            hint: '2³ = 8, angle becomes 3 × 30° = 90°. cos 90° = 0, sin 90° = 1.',
+            explanation: 'z³ = 8(cos 90° + i sin 90°) = 8(0 + i) = 8i.'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'unit-9',
+    number: 9,
+    title: 'Matrices & Linear Systems',
+    icon: '🔢',
+    goal: 'Master determinants, inverse matrices, Cramer\'s rule, and Eigenvalues required in HND engineering problems.',
+    skills: [
+      {
+        id: 'skill-9.1',
+        title: 'Determinants & Matrix Inverses',
+        description: 'Calculating 2x2 and 3x3 determinants and finding A⁻¹',
+        lessons: [
+          {
+            id: 'lesson-9.1.1',
+            title: 'Matrix Inverses and Determinants',
+            explanation: 'The determinant det(A) or |A| measures if a matrix can be inverted. If det(A) = 0, the matrix is singular and has no inverse. For a 2x2 matrix A = [[a, b], [c, d]], det(A) = ad - bc, and A⁻¹ = (1/det(A)) * [[d, -b], [-c, a]].',
+            everydayExample: 'In structural engineering or electrical circuits, a system of equations AX = B represents forces or nodal voltages. Finding X = A⁻¹B gives the exact solution instantly!',
+            keyConcept: 'det(A) = ad - bc. A⁻¹ exists ONLY if det(A) ≠ 0.',
+            formula: 'A⁻¹ = (1 / (ad - bc)) · [[d, -b], [-c, a]]',
+            workedExample: {
+              problem: 'Find the inverse of A = [[4, 2], [3, 1]]',
+              steps: [
+                'det(A) = (4)(1) - (2)(3) = 4 - 6 = -2',
+                'Swap main diagonal: 4 and 1 swap → 1 and 4',
+                'Negate off diagonal: 2 and 3 become -2 and -3',
+                'A⁻¹ = (-1/2) * [[1, -2], [-3, 4]] = [[-0.5, 1], [1.5, -2]]'
+              ],
+              answer: '[[-0.5, 1], [1.5, -2]]'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-9.1.1',
+            question: 'Find det(A) for A = [[3, 5], [2, 4]].',
+            type: 'text',
+            correctAnswer: '2',
+            hint: 'ad - bc = 3(4) - 5(2)',
+            explanation: 'det(A) = 12 - 10 = 2.'
+          },
+          {
+            id: 'pq-9.1.2',
+            question: 'Solve for x using Cramer\'s Rule: 2x + 3y = 8 and x - y = 1.',
+            type: 'text',
+            correctAnswer: '2.2',
+            hint: 'D = det([[2,3],[1,-1]]) = -5. Dx = det([[8,3],[1,-1]]) = -11. x = Dx/D = -11/-5 = 2.2.',
+            explanation: 'D = -5. Dx = (8)(-1) - (3)(1) = -11. x = -11 / -5 = 2.2.'
+          }
+        ]
+      },
+      {
+        id: 'skill-9.2',
+        title: 'Eigenvalues & Eigenvectors',
+        description: 'Solving det(A - λI) = 0 for stability and frequency analysis',
+        lessons: [
+          {
+            id: 'lesson-9.2.1',
+            title: 'Characteristic Equation det(A - λI) = 0',
+            explanation: 'Eigenvalues λ represent special scalar multipliers where matrix transformation acts as pure stretching without changing direction: Av = λv. To find them, solve the characteristic equation det(A - λI) = 0.',
+            everydayExample: 'In vibration analysis of bridges or mechanical structures, eigenvalues correspond to natural resonant frequencies! Finding eigenvalues prevents structural collapse from resonance.',
+            keyConcept: 'Solve det(A - λI) = 0 to get polynomial in λ, then find roots.',
+            workedExample: {
+              problem: 'Find eigenvalues of A = [[2, 1], [1, 2]]',
+              steps: [
+                'Form A - λI = [[2-λ, 1], [1, 2-λ]]',
+                'det(A - λI) = (2-λ)(2-λ) - (1)(1) = 0',
+                'λ² - 4λ + 4 - 1 = λ² - 4λ + 3 = 0',
+                'Factor: (λ - 1)(λ - 3) = 0',
+                'Eigenvalues: λ₁ = 1, λ₂ = 3'
+              ],
+              answer: 'λ = 1, 3'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-9.2.1',
+            question: 'What is the characteristic equation of A = [[3, 0], [0, 5]]?',
+            type: 'text',
+            correctAnswer: '(3-λ)(5-λ)=0',
+            hint: 'Diagonal matrix eigenvalues are just the diagonal elements!',
+            explanation: 'det([[3-λ, 0],[0, 5-λ]]) = (3-λ)(5-λ) = 0. Roots are λ = 3, 5.'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'unit-10',
+    number: 10,
+    title: 'Partial Fractions & Integration',
+    icon: '✂️',
+    goal: 'Master partial fractions decomposition and Integration by Parts — mandatory for passing HND calculus questions.',
+    skills: [
+      {
+        id: 'skill-10.1',
+        title: 'Partial Fractions Decomposition',
+        description: 'Splitting complex fractions into simple addable terms',
+        lessons: [
+          {
+            id: 'lesson-10.1.1',
+            title: 'Linear Factors Decomposition',
+            explanation: 'When integrating a fraction with a factored polynomial in the denominator, split it into A/(x-a) + B/(x-b). Multiply through by the denominator and equate coefficients or use cover-up method to find A and B.',
+            everydayExample: 'Decomposing fractions is like taking apart a complex machine into standard nuts and bolts so each piece can be easily serviced (integrated or Laplace transformed).',
+            keyConcept: '(P x + Q)/[(x-a)(x-b)] = A/(x-a) + B/(x-b).',
+            workedExample: {
+              problem: 'Decompose: 5/( (x - 1)(x + 4) )',
+              steps: [
+                'Set 5/[(x-1)(x+4)] = A/(x-1) + B/(x+4)',
+                'Multiply by (x-1)(x+4): 5 = A(x+4) + B(x-1)',
+                'Let x = 1: 5 = A(5) + 0 → A = 1',
+                'Let x = -4: 5 = 0 + B(-5) → B = -1',
+                'Result: 1/(x-1) - 1/(x+4)'
+              ],
+              answer: '1/(x-1) - 1/(x+4)'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-10.1.1',
+            question: 'Decompose 3/[(x-2)(x+1)] into A/(x-2) + B/(x+1). What is A?',
+            type: 'text',
+            correctAnswer: '1',
+            hint: 'Let x = 2 in 3 = A(x+1) + B(x-2). 3 = A(3) → A = 1.',
+            explanation: '3 = A(x+1) + B(x-2). Setting x = 2 gives 3 = 3A, so A = 1.'
+          }
+        ]
+      },
+      {
+        id: 'skill-10.2',
+        title: 'Integration by Parts',
+        description: 'Using ∫ u dv = u v - ∫ v du for products like x·eˣ or x·sin(x)',
+        lessons: [
+          {
+            id: 'lesson-10.2.1',
+            title: 'LIATE Rule for Integration by Parts',
+            explanation: 'When integrating the product of two functions ∫ u dv = u v - ∫ v du, choose u according to LIATE priority: Logarithmic, Inverse trig, Algebraic, Trigonometric, Exponential.',
+            everydayExample: 'Integration by parts breaks down a difficult product integral into a simple product minus a much easier residual integral!',
+            keyConcept: '∫ u dv = uv - ∫ v du. Choose u using LIATE.',
+            workedExample: {
+              problem: 'Evaluate ∫ x eˣ dx',
+              steps: [
+                'Choose u = x (Algebraic) and dv = eˣ dx',
+                'Then du = dx and v = eˣ',
+                'Apply formula: uv - ∫ v du = x eˣ - ∫ eˣ dx',
+                'Result: x eˣ - eˣ + C = eˣ(x - 1) + C'
+              ],
+              answer: 'eˣ(x - 1) + C'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-10.2.1',
+            question: 'Evaluate ∫ x cos(x) dx.',
+            type: 'text',
+            correctAnswer: 'x sin(x) + cos(x) + C',
+            hint: 'u = x, dv = cos(x) dx → du = dx, v = sin(x). uv - ∫v du = x sin(x) - ∫sin(x) dx.',
+            explanation: 'x sin(x) - (-cos(x)) + C = x sin(x) + cos(x) + C.'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'unit-11',
+    number: 11,
+    title: 'Differential Equations & Fourier Series',
+    icon: '🌊',
+    goal: 'Solve 1st and 2nd Order ODEs and compute Fourier coefficients for periodic signals in HND exams.',
+    skills: [
+      {
+        id: 'skill-11.1',
+        title: '1st Order ODEs & Integrating Factors',
+        description: 'Solving dy/dx + P(x)y = Q(x) using IF = e^(∫ P(x)dx)',
+        lessons: [
+          {
+            id: 'lesson-11.1.1',
+            title: 'Linear 1st Order Differential Equations',
+            explanation: 'For differential equations of the form dy/dx + P(x)y = Q(x), multiply every term by the Integrating Factor IF = e^(∫ P(x)dx). The left side condenses into d/dx [y · IF]. Integrate both sides to solve for y.',
+            everydayExample: 'Models cooling objects (Newton\'s Law of Cooling), charging capacitors in RC circuits, and population growth with immigration!',
+            keyConcept: 'IF = e^(∫ P(x) dx). Solution: y · IF = ∫ (Q(x) · IF) dx + C.',
+            workedExample: {
+              problem: 'Solve dy/dx + 2y = e⁻ˣ',
+              steps: [
+                'P(x) = 2, Q(x) = e⁻ˣ',
+                'IF = e^(∫ 2 dx) = e²ˣ',
+                'Multiply through: e²ˣ(dy/dx) + 2e²ˣ y = e²ˣ · e⁻ˣ = eˣ',
+                'Left side is d/dx [y e²ˣ] = eˣ',
+                'Integrate: y e²ˣ = ∫ eˣ dx = eˣ + C',
+                'Divide by e²ˣ: y = e⁻ˣ + C e⁻²ˣ'
+              ],
+              answer: 'y = e⁻ˣ + C e⁻²ˣ'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-11.1.1',
+            question: 'What is the Integrating Factor for dy/dx + 3y = x?',
+            type: 'text',
+            correctAnswer: 'e³ˣ',
+            hint: 'IF = e^(∫ 3 dx)',
+            explanation: 'IF = e^(∫ 3 dx) = e³ˣ.'
+          }
+        ]
+      },
+      {
+        id: 'skill-11.2',
+        title: 'Fourier Series Basics',
+        description: 'Representing periodic functions as sums of sines and cosines',
+        lessons: [
+          {
+            id: 'lesson-11.2.1',
+            title: 'Fourier Coefficients a₀, aₙ, bₙ',
+            explanation: 'Any periodic wave f(x) with period 2L can be written as f(x) = a₀/2 + ∑ [aₙ cos(nπx/L) + bₙ sin(nπx/L)]. For even functions (f(-x) = f(x)), bₙ = 0. For odd functions (f(-x) = -f(x)), a₀ = 0 and aₙ = 0.',
+            everydayExample: 'In signal processing, audio equalizer, and electrical engineering, Fourier series breaks down complex square or sawtooth sound waves into pure sine wave frequencies!',
+            keyConcept: 'Even function → Cosine series (bₙ = 0). Odd function → Sine series (aₙ = 0).',
+            workedExample: {
+              problem: 'If f(x) = x on (-π, π) is an odd function, which Fourier coefficients are ZERO?',
+              steps: [
+                'Check symmetry: f(-x) = -x = -f(x) → Odd function!',
+                'Odd functions have symmetry about origin',
+                'Cosine terms and DC offset are even, so a₀ = 0 and all aₙ = 0',
+                'Only sine terms bₙ remain!'
+              ],
+              answer: 'a₀ = 0 and aₙ = 0'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-11.2.1',
+            question: 'For an even function f(x) = x² on (-π, π), which coefficient is ALWAYS zero?',
+            type: 'multiple-choice',
+            options: ['bₙ', 'a₀', 'aₙ', 'None'],
+            correctAnswer: 'bₙ',
+            hint: 'Even functions have symmetry about y-axis and consist only of cosines!',
+            explanation: 'Even functions have bₙ = 0 because sin(nx) is an odd function.'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'unit-12',
+    number: 12,
+    title: 'Numerical Methods & Standard Distributions',
+    icon: '🎯',
+    goal: 'Master Trapezoidal Rule, Simpson\'s Rule, Newton-Raphson, and Normal/Binomial distributions for high marks.',
+    skills: [
+      {
+        id: 'skill-12.1',
+        title: 'Trapezoidal & Simpson\'s 1/3 Rule',
+        description: 'Approximating definite integrals numerically when exact integration is hard',
+        lessons: [
+          {
+            id: 'lesson-12.1.1',
+            title: 'Numerical Integration Formulas',
+            explanation: 'Trapezoidal Rule: ∫[a to b] f(x)dx ≈ (h/2) [y₀ + yₙ + 2(y₁ + y₂ + ... + yₙ₋₁)]. Simpson\'s 1/3 Rule: (h/3) [(y₀ + yₙ) + 4(Odd y\'s) + 2(Even y\'s)]. Note: Simpson\'s rule requires an EVEN number of intervals (n)!',
+            everydayExample: 'Engineers use numerical integration to calculate cross-sectional areas of irregularly shaped riverbeds, ship hulls, or land terrains from measured height samples!',
+            keyConcept: 'h = (b - a)/n. Simpson\'s 1/3 uses multipliers: 1, 4, 2, 4, 2 ... 4, 1.',
+            formula: 'Simpson: (h/3)[(y₀ + yₙ) + 4∑y_odd + 2∑y_even]',
+            workedExample: {
+              problem: 'Use Trapezoidal rule with n = 2 to estimate ∫[0 to 2] x² dx',
+              steps: [
+                'a = 0, b = 2, n = 2 → h = (2 - 0)/2 = 1',
+                'x values: x₀ = 0, x₁ = 1, x₂ = 2',
+                'y values: y₀ = 0² = 0, y₁ = 1² = 1, y₂ = 2² = 4',
+                'Trapezoidal formula: (1/2) [0 + 4 + 2(1)] = (1/2) [6] = 3'
+              ],
+              answer: '3 (Exact integral is 8/3 ≈ 2.67)'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-12.1.1',
+            question: 'To use Simpson\'s 1/3 Rule, the number of subintervals n MUST be...',
+            type: 'multiple-choice',
+            options: ['Even', 'Odd', 'Prime', 'Any integer'],
+            correctAnswer: 'Even',
+            hint: 'Simpson\'s 1/3 rule pairs up subintervals into parabolas.',
+            explanation: 'Simpson\'s 1/3 rule requires an EVEN number of intervals n (which means an odd number of ordinates).'
+          }
+        ]
+      },
+      {
+        id: 'skill-12.2',
+        title: 'Newton-Raphson Method',
+        description: 'Iteratively finding roots of equations f(x) = 0',
+        lessons: [
+          {
+            id: 'lesson-12.2.1',
+            title: 'Root Finding via Tangent Lines',
+            explanation: 'The Newton-Raphson formula xₙ₊₁ = xₙ - f(xₙ)/f\'(xₙ) generates rapidly converging approximations to roots of f(x) = 0 starting from an initial guess x₀.',
+            everydayExample: 'Calculators and computer algorithms use Newton-Raphson under the hood to calculate square roots and solve non-linear engineering equations in milliseconds!',
+            keyConcept: 'x₁ = x₀ - f(x₀)/f\'(x₀).',
+            workedExample: {
+              problem: 'Use Newton-Raphson with x₀ = 2 to find 1st iteration for x² - 5 = 0',
+              steps: [
+                'f(x) = x² - 5, so f\'(x) = 2x',
+                'f(x₀) = f(2) = 2² - 5 = -1',
+                'f\'(x₀) = f\'(2) = 2(2) = 4',
+                'x₁ = 2 - (-1 / 4) = 2 + 0.25 = 2.25'
+              ],
+              answer: '2.25'
+            }
+          }
+        ],
+        practice: [
+          {
+            id: 'pq-12.2.1',
+            question: 'Using f(x) = x² - 2 and x₀ = 1, calculate x₁ using Newton-Raphson.',
+            type: 'text',
+            correctAnswer: '1.5',
+            hint: 'f(1) = -1, f\'(1) = 2. x₁ = 1 - (-1/2) = 1.5.',
+            explanation: 'f(1) = 1 - 2 = -1. f\'(x) = 2x → f\'(1) = 2. x₁ = 1 - (-1/2) = 1 + 0.5 = 1.5.'
+          }
+        ]
+      }
+    ]
   }
 ];
+
