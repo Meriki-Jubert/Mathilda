@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FiArrowLeft, FiFileText, FiHelpCircle, FiCheckCircle, FiUnlock } from 'react-icons/fi';
 import { hndExamQuestions, ExamQuestion } from '../data/hndExamBank';
 
 interface HndExamBankViewProps {
@@ -26,21 +27,27 @@ export default function HndExamBankView({ onBack }: HndExamBankViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 text-slate-800">
-      {/* Header */}
-      <div className="max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans p-4 md:p-8">
+      {/* Vault Header */}
+      <div className="max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-emerald-950 via-slate-900 to-amber-950 text-stone-100 p-6 rounded border border-amber-900/40 shadow-xs">
         <div>
           <button
             onClick={onBack}
-            className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 mb-2"
+            className="text-xs font-mono font-medium text-amber-300 hover:text-white flex items-center gap-1 mb-2"
           >
-            ← Back to Learning Path
+            <FiArrowLeft size={14} /> Back to Expedition Map
           </button>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
-            <span>🇨🇲</span> Cameroon HND Math Past Exam Bank
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950 border border-emerald-700 px-2 py-0.5 rounded flex items-center gap-1">
+              <FiUnlock size={12} /> Secret Vault Unlocked
+            </span>
+          </div>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            <FiFileText className="text-amber-400" size={22} />
+            Secret HND Past Paper Temple Vault
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Real multi-part 10-mark exam questions with step-by-step marking schemes
+          <p className="text-xs text-stone-300 mt-1">
+            Official 10-mark examination solutions unlocked through Knowledge Fruit harvesting
           </p>
         </div>
       </div>
@@ -48,19 +55,19 @@ export default function HndExamBankView({ onBack }: HndExamBankViewProps) {
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Module Filter Sidebar */}
         <div className="lg:col-span-4 flex flex-col gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-              <span>📚</span> Select Exam Module
+          <div className="bg-white p-5 rounded border border-stone-300 shadow-xs">
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-stone-700 mb-3">
+              Filter Vault Papers
             </h3>
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-1.5 mb-4 font-mono text-xs">
               {modules.map(mod => (
                 <button
                   key={mod}
                   onClick={() => setSelectedModule(mod)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`px-3 py-1 rounded transition-all ${
                     selectedModule === mod
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-slate-900 text-white font-bold'
+                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-300'
                   }`}
                 >
                   {mod}
@@ -68,7 +75,7 @@ export default function HndExamBankView({ onBack }: HndExamBankViewProps) {
               ))}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {filteredQuestions.map(q => (
                 <div
                   key={q.id}
@@ -77,22 +84,22 @@ export default function HndExamBankView({ onBack }: HndExamBankViewProps) {
                     setRevealedParts({});
                     setRevealedHints({});
                   }}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  className={`p-3.5 rounded border cursor-pointer transition-all ${
                     activeQuestion?.id === q.id
-                      ? 'bg-emerald-50 border-emerald-500 shadow-sm'
-                      : 'bg-white border-slate-200 hover:border-emerald-300'
+                      ? 'bg-amber-50/80 border-amber-500 shadow-xs'
+                      : 'bg-white border-stone-300 hover:border-amber-500'
                   }`}
                 >
-                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                    <span className="font-medium text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">
+                  <div className="flex items-center justify-between text-xs font-mono text-stone-500 mb-1">
+                    <span className="font-bold text-amber-950 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
                       {q.module}
                     </span>
                     <span>{q.totalMarks} Marks</span>
                   </div>
-                  <h4 className="font-semibold text-slate-900 text-sm line-clamp-2">
+                  <h4 className="font-semibold text-stone-900 text-xs leading-snug line-clamp-2 mt-1">
                     {q.title}
                   </h4>
-                  <p className="text-xs text-slate-400 mt-1">{q.paperYear}</p>
+                  <p className="text-[11px] font-mono text-stone-500 mt-1">{q.paperYear}</p>
                 </div>
               ))}
             </div>
@@ -102,25 +109,25 @@ export default function HndExamBankView({ onBack }: HndExamBankViewProps) {
         {/* Main Question Detail View */}
         <div className="lg:col-span-8">
           {activeQuestion ? (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4 mb-6">
+            <div className="bg-white rounded border border-stone-300 shadow-xs p-6 md:p-8 space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200 pb-4">
                 <div>
-                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                  <span className="text-xs font-mono font-bold text-emerald-900 bg-emerald-100 px-2.5 py-1 rounded border border-emerald-300">
                     {activeQuestion.module}
                   </span>
-                  <p className="text-xs text-slate-400 mt-2">{activeQuestion.paperYear}</p>
-                  <h2 className="text-xl font-bold text-slate-900 mt-1">{activeQuestion.title}</h2>
+                  <p className="text-xs font-mono text-stone-500 mt-2">{activeQuestion.paperYear}</p>
+                  <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-1">{activeQuestion.title}</h2>
                 </div>
-                <div className="text-right">
-                  <span className="text-2xl font-extrabold text-emerald-600">{activeQuestion.totalMarks}</span>
-                  <span className="text-xs font-medium text-slate-400 block">Total Marks</span>
+                <div className="text-right font-mono">
+                  <span className="text-2xl font-bold text-emerald-800">{activeQuestion.totalMarks}</span>
+                  <span className="text-xs font-semibold text-stone-500 block">Total Marks</span>
                 </div>
               </div>
 
               {/* Problem Scenario */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Problem Scenario</h4>
-                <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-line font-mono">
+              <div className="bg-stone-50 border border-stone-300 rounded p-4 font-mono text-xs">
+                <h4 className="font-bold text-stone-600 uppercase tracking-wider mb-1">Vault Problem Statement</h4>
+                <p className="text-stone-900 leading-relaxed whitespace-pre-line">
                   {activeQuestion.scenario}
                 </p>
               </div>
@@ -133,61 +140,63 @@ export default function HndExamBankView({ onBack }: HndExamBankViewProps) {
                   const hintShown = !!revealedHints[partKey];
 
                   return (
-                    <div key={index} className="border border-slate-200 rounded-xl p-5 bg-white hover:border-slate-300 transition-all">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <h4 className="text-base font-bold text-slate-900">
-                          <span className="text-emerald-600 mr-2">{part.partLabel}</span>
+                    <div key={index} className="border border-stone-300 rounded p-5 bg-white hover:border-stone-400 transition-all space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <h4 className="text-sm font-bold text-stone-900 leading-snug">
+                          <span className="text-emerald-800 font-mono mr-2">{part.partLabel}</span>
                           {part.questionText}
                         </h4>
-                        <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+                        <span className="text-xs font-mono font-bold text-stone-700 bg-stone-100 px-2.5 py-1 rounded border border-stone-200 shrink-0">
                           {part.marks} {part.marks === 1 ? 'Mark' : 'Marks'}
                         </span>
                       </div>
 
-                      {/* Hint Button */}
-                      <div className="mt-3 flex items-center gap-3">
+                      {/* Control Buttons */}
+                      <div className="flex items-center gap-2 pt-1 font-mono text-xs">
                         <button
                           onClick={() => toggleHint(partKey)}
-                          className="text-xs font-medium text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 transition-all"
+                          className="flex items-center gap-1 font-medium text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded border border-amber-300 transition-colors"
                         >
-                          {hintShown ? 'Hide Exam Hint 💡' : 'Need a Hint? 💡'}
+                          <FiHelpCircle size={13} />
+                          {hintShown ? 'Hide Vault Hint' : 'View Vault Hint'}
                         </button>
 
                         <button
                           onClick={() => toggleReveal(partKey)}
-                          className={`text-xs font-semibold px-4 py-1.5 rounded-lg transition-all ${
+                          className={`flex items-center gap-1 font-bold px-3.5 py-1.5 rounded transition-colors ${
                             isRevealed
-                              ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                              : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm'
+                              ? 'bg-stone-200 text-stone-800 hover:bg-stone-300 border border-stone-300'
+                              : 'bg-amber-700 hover:bg-amber-800 text-white shadow-xs'
                           }`}
                         >
-                          {isRevealed ? 'Hide Solution' : 'Reveal Step-by-Step Solution'}
+                          <FiCheckCircle size={13} />
+                          {isRevealed ? 'Hide Solution Scheme' : 'Reveal Official Scheme'}
                         </button>
                       </div>
 
                       {/* Hint Box */}
                       {hintShown && (
-                        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
-                          <strong>Exam Tip:</strong> {part.hint}
+                        <div className="p-3 bg-amber-50 border border-amber-300 rounded text-xs text-amber-950 font-mono">
+                          <strong>Official Exam Tip:</strong> {part.hint}
                         </div>
                       )}
 
                       {/* Solution Scheme */}
                       {isRevealed && (
-                        <div className="mt-4 pt-4 border-t border-slate-100 animate-fadeIn">
-                          <h5 className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2">
-                            Official Step-by-Step Marking Scheme
+                        <div className="pt-3 border-t border-stone-200 animate-fadeIn space-y-3">
+                          <h5 className="text-[11px] font-mono font-bold text-emerald-800 uppercase tracking-wider">
+                            Official Marking Scheme Steps
                           </h5>
-                          <ol className="list-decimal list-inside space-y-1.5 text-sm text-slate-700 font-mono bg-slate-900 text-slate-100 p-4 rounded-xl">
+                          <ol className="list-decimal list-inside space-y-1.5 text-xs text-stone-900 font-mono bg-slate-900 text-slate-100 p-4 rounded border border-slate-800">
                             {part.solutionSteps.map((step, sIdx) => (
                               <li key={sIdx} className="leading-relaxed">
                                 {step}
                               </li>
                             ))}
                           </ol>
-                          <div className="mt-3 bg-emerald-50 border border-emerald-200 p-3 rounded-lg flex items-center justify-between">
-                            <span className="text-xs font-bold text-emerald-800">Final Answer:</span>
-                            <span className="text-sm font-extrabold text-emerald-900 font-mono">{part.finalAnswer}</span>
+                          <div className="bg-emerald-50 border border-emerald-300 p-3 rounded flex items-center justify-between font-mono text-xs">
+                            <span className="font-bold text-emerald-900">Final Evaluated Answer:</span>
+                            <span className="font-bold text-emerald-950">{part.finalAnswer}</span>
                           </div>
                         </div>
                       )}
@@ -197,8 +206,8 @@ export default function HndExamBankView({ onBack }: HndExamBankViewProps) {
               </div>
             </div>
           ) : (
-            <div className="bg-white p-12 rounded-2xl border text-center text-slate-400">
-              Select a question from the left sidebar
+            <div className="bg-white p-12 rounded border text-center text-stone-400 font-mono text-xs">
+              Select a paper from the vault sidebar
             </div>
           )}
         </div>

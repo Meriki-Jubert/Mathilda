@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { FiBook, FiFileText, FiBookmark, FiSliders, FiBarChart2, FiSettings } from 'react-icons/fi';
 import { curriculum } from './data/curriculum';
 import { useProgress } from './hooks/useProgress';
 import { useAIConfig } from './hooks/useAIConfig';
@@ -14,6 +15,7 @@ import WeeklyReportView from './components/WeeklyReport';
 import HndExamBankView from './components/HndExamBankView';
 import HndFormulaSheetView from './components/HndFormulaSheetView';
 import HndSolversView from './components/HndSolversView';
+import BackpackModal from './components/BackpackModal';
 
 type View = 'welcome' | 'tree' | 'skill-hub' | 'lesson' | 'practice' | 'hnd-exams' | 'hnd-formulas' | 'hnd-solvers';
 
@@ -39,17 +41,16 @@ function App() {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [backpackOpen, setBackpackOpen] = useState(false);
 
   const [viewState, setViewState] = useState<ViewState>(() => {
     const hasProgress = localStorage.getItem('math-mastery-progress');
     return { view: hasProgress ? 'tree' : 'welcome' };
   });
 
-  // Practice state for AI answer injection
   const [injectedAnswer, setInjectedAnswer] = useState<string | null>(null);
   const questionStartTime = useRef<number>(Date.now());
 
-  // Track current question for analytics
   const currentSkill = viewState.unitId && viewState.skillId
     ? findSkillHelper(viewState.unitId, viewState.skillId)
     : null;
@@ -90,7 +91,6 @@ function App() {
     if (viewState.unitId && viewState.skillId && viewState.lessonId) {
       completeLesson(viewState.skillId, viewState.lessonId);
       
-      // Log lesson completion
       const unit = findUnit(viewState.unitId);
       const skill = findSkill(viewState.unitId, viewState.skillId);
       const lesson = findLesson(viewState.unitId, viewState.skillId, viewState.lessonId);
@@ -114,7 +114,6 @@ function App() {
 
       completePractice(viewState.skillId, questionId);
 
-      // Log the answer
       const unit = findUnit(viewState.unitId);
       const skill = findSkill(viewState.unitId, viewState.skillId);
       const question = skill?.practice.find(q => q.id === questionId);
@@ -136,7 +135,6 @@ function App() {
         });
       }
 
-      // Check if all practice questions are complete
       if (skill) {
         const skillProg = progress.skillProgress[viewState.skillId];
         const completedCount = (skillProg?.practiceCompleted.length || 0) + 1;
@@ -171,12 +169,10 @@ function App() {
     return '';
   };
 
-  // Handle AI extracting answer from image
   const handleImageAnswerExtracted = (answer: string) => {
     setInjectedAnswer(answer);
   };
 
-  // Handle chat logging
   const handleChatLogged = (message: string, hadImage: boolean) => {
     analytics.recordChat({
       topic: getCurrentTopic(),
@@ -185,14 +181,12 @@ function App() {
     });
   };
 
-  // Clear injected answer after it's been consumed
   useEffect(() => {
     if (injectedAnswer && viewState.view !== 'practice') {
       setInjectedAnswer(null);
     }
   }, [viewState.view, injectedAnswer]);
 
-  // Build AI context
   const aiContext = analytics.getAIContext(
     viewState.skillId,
     currentSkill?.practice?.[0]?.question
@@ -215,6 +209,7 @@ function App() {
             onSelectSkill={handleSelectSkill}
             totalXP={progress.totalXP}
             streakDays={analytics.data.streakDays}
+            onOpenBackpack={() => setBackpackOpen(true)}
           />
         );
 
@@ -228,6 +223,7 @@ function App() {
           <SkillHub
             skill={skill}
             unitTitle={unit.title}
+            unitId={viewState.unitId}
             lessonsCompleted={skillProg?.lessonsCompleted || []}
             practiceCompleted={skillProg?.practiceCompleted || []}
             masteryLevel={getSkillMastery(viewState.skillId!)}
@@ -288,7 +284,6 @@ function App() {
     }
   };
 
-  // Get current question text for AI context
   const getCurrentQuestion = () => {
     if (viewState.view === 'practice' && viewState.unitId && viewState.skillId) {
       const skill = findSkill(viewState.unitId, viewState.skillId);
@@ -301,84 +296,97 @@ function App() {
   };
 
   return (
-    <div className="relative">
-      {/* Top Header Navigation for Cameroon HND Maths */}
+    <div className="relative min-h-screen bg-[#FAF9F6] text-stone-900 font-sans">
+      {/* Editorial Header Navigation */}
       {viewState.view !== 'welcome' && (
-        <header className="sticky top-0 z-30 bg-slate-900 text-slate-100 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shadow-md">
+        <header className="sticky top-0 z-30 bg-slate-900 text-slate-100 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
             <button
               onClick={handleBackToTree}
-              className="text-sm font-bold tracking-tight hover:text-emerald-400 transition-colors flex items-center gap-2"
+              className="text-sm font-bold tracking-tight text-white hover:text-emerald-400 transition-colors flex items-center gap-2"
             >
-              <span className="text-lg">🇨🇲</span>
-              <span className="hidden sm:inline font-extrabold text-white">Cameroon HND Math Mastery</span>
+              <span className="font-mono text-amber-300 font-extrabold text-xs uppercase px-1.5 py-0.5 border border-amber-500/40 bg-amber-950 rounded flex items-center gap-1">
+                🌴 Mathilda
+              </span>
+              <span className="hidden sm:inline font-bold">Jungle Expedition</span>
             </button>
           </div>
 
-          <nav className="flex items-center gap-1 sm:gap-2">
+          <nav className="flex items-center gap-1 sm:gap-1.5 font-mono text-xs">
             <button
               onClick={() => setViewState({ view: 'tree' })}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded transition-all flex items-center gap-1.5 ${
                 viewState.view === 'tree' || viewState.view === 'skill-hub' || viewState.view === 'lesson' || viewState.view === 'practice'
-                  ? 'bg-emerald-600 text-white shadow-sm'
+                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              🌳 Curriculum
+              <FiBook size={13} />
+              <span>Syllabus Map</span>
             </button>
 
             <button
               onClick={() => setViewState({ view: 'hnd-exams' })}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded transition-all flex items-center gap-1.5 ${
                 viewState.view === 'hnd-exams'
-                  ? 'bg-emerald-600 text-white shadow-sm'
+                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              📜 Exam Bank
+              <FiFileText size={13} />
+              <span>Past Paper Vault</span>
             </button>
 
             <button
               onClick={() => setViewState({ view: 'hnd-formulas' })}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded transition-all flex items-center gap-1.5 ${
                 viewState.view === 'hnd-formulas'
-                  ? 'bg-emerald-600 text-white shadow-sm'
+                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              📐 Formulas
+              <FiBookmark size={13} />
+              <span>Formulas</span>
             </button>
 
             <button
               onClick={() => setViewState({ view: 'hnd-solvers' })}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded transition-all flex items-center gap-1.5 ${
                 viewState.view === 'hnd-solvers'
-                  ? 'bg-emerald-600 text-white shadow-sm'
+                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              🧮 Solvers
+              <FiSliders size={13} />
+              <span>Solvers</span>
             </button>
           </nav>
         </header>
       )}
 
-      {/* Settings & Report Buttons */}
+      {/* Analytics & Settings Controls */}
       {viewState.view !== 'welcome' && (
         <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2">
           <button
-            onClick={() => setReportOpen(true)}
-            className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl border border-gray-200 transition-all hover:scale-105"
-            title="Weekly Analytics Report"
+            onClick={() => setBackpackOpen(true)}
+            className="p-2.5 bg-amber-900 text-amber-200 rounded border border-amber-700 shadow-md hover:shadow-lg transition-all hover:scale-105"
+            title="Open Expedition Backpack"
           >
-            <span className="text-lg">📊</span>
+            <span className="text-base">🎒</span>
+          </button>
+          <button
+            onClick={() => setReportOpen(true)}
+            className="p-2.5 bg-white text-slate-800 rounded border border-slate-300 shadow-md hover:shadow-lg transition-all hover:border-slate-400"
+            title="Weekly Study Analytics"
+          >
+            <FiBarChart2 size={18} />
           </button>
           <button
             onClick={() => setSettingsOpen(true)}
-            className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl border border-gray-200 transition-all hover:scale-105"
-            title="AI Settings"
+            className="p-2.5 bg-white text-slate-800 rounded border border-slate-300 shadow-md hover:shadow-lg transition-all hover:border-slate-400"
+            title="Tutor Settings"
           >
-            <span className="text-lg">⚙️</span>
+            <FiSettings size={18} />
           </button>
         </div>
       )}
@@ -413,6 +421,14 @@ function App() {
         isOpen={reportOpen}
         onClose={() => setReportOpen(false)}
         report={analytics.getWeeklyReport()}
+      />
+
+      <BackpackModal
+        isOpen={backpackOpen}
+        onClose={() => setBackpackOpen(false)}
+        completedSkills={progress.completedSkills}
+        totalXP={progress.totalXP}
+        onNavigateToExams={() => setViewState({ view: 'hnd-exams' })}
       />
     </div>
   );

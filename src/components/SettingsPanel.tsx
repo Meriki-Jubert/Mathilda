@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiX, FiExternalLink, FiCheck, FiAlertCircle, FiZap, FiEye } from 'react-icons/fi';
-import { AIConfig, AIProvider, PROVIDER_INFO, VISION_MODELS, getModelsForProvider } from '../services/aiModels';
+import { AIConfig, AIProvider, PROVIDER_INFO, getModelsForProvider } from '../services/aiModels';
 import { testConnection } from '../services/aiService';
 
 interface SettingsPanelProps {
@@ -37,7 +37,7 @@ export default function SettingsPanel({ isOpen, onClose, config, onSave }: Setti
     try {
       const result = await testConnection(localConfig);
       if (result.success) {
-        setTestResult({ success: true, message: 'Connection successful! ✅' });
+        setTestResult({ success: true, message: 'Connection verified successfully! ✓' });
       } else {
         setTestResult({ success: false, message: result.error || 'Connection failed' });
       }
@@ -66,27 +66,30 @@ export default function SettingsPanel({ isOpen, onClose, config, onSave }: Setti
   const providerInfo = PROVIDER_INFO[localConfig.provider];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-5 flex items-center justify-between rounded-t-2xl z-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs font-sans text-slate-900">
+      <div className="bg-white rounded border border-slate-300 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        {/* Modal Header */}
+        <div className="bg-slate-900 text-white border-b border-slate-800 p-4 flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-gray-800">⚙️ AI Settings</h2>
-            <p className="text-sm text-gray-500">Configure your AI tutor</p>
+            <h2 className="text-base font-bold tracking-tight text-white flex items-center gap-2">
+              <span>⚙️</span> AI Tutor Configuration Engine
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">Select provider, vision model, and API keys for AI feedback</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
           >
-            <FiX size={20} />
+            <FiX size={18} />
           </button>
         </div>
 
-        <div className="p-5 space-y-6">
+        {/* Modal Body */}
+        <div className="p-5 space-y-5 overflow-y-auto flex-1 bg-slate-50">
           {/* Provider Selection */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">
-              AI Provider
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+              1. AI Provider Engine
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {(Object.keys(PROVIDER_INFO) as AIProvider[]).map(provider => {
@@ -96,18 +99,18 @@ export default function SettingsPanel({ isOpen, onClose, config, onSave }: Setti
                   <button
                     key={provider}
                     onClick={() => handleProviderChange(provider)}
-                    className={`p-3 rounded-xl border-2 transition-all text-left ${
+                    className={`p-2.5 rounded border text-left transition-all ${
                       isSelected
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-emerald-600 bg-emerald-50 text-slate-900 font-bold shadow-xs'
+                        : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-3 h-3 rounded-full"
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: info.color }}
                       />
-                      <span className={`text-sm font-medium ${isSelected ? 'text-purple-700' : 'text-gray-700'}`}>
+                      <span className="text-xs font-mono font-semibold">
                         {info.name}
                       </span>
                     </div>
@@ -117,19 +120,19 @@ export default function SettingsPanel({ isOpen, onClose, config, onSave }: Setti
             </div>
           </div>
 
-          {/* API Key */}
+          {/* API Key Entry */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-bold text-gray-700">
-                API Key
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                2. {providerInfo.name} API Key
               </label>
               <a
                 href={providerInfo.getApiKeyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700"
+                className="flex items-center gap-1 text-xs text-emerald-700 hover:underline font-mono font-semibold"
               >
-                Get API key <FiExternalLink size={12} />
+                Get API Key <FiExternalLink size={12} />
               </a>
             </div>
             <div className="relative">
@@ -137,63 +140,62 @@ export default function SettingsPanel({ isOpen, onClose, config, onSave }: Setti
                 type={showKey ? 'text' : 'password'}
                 value={localConfig.apiKey}
                 onChange={e => setLocalConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-                placeholder={`Enter your ${providerInfo.name} API key...`}
-                className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-400 text-sm font-mono"
+                placeholder={`Paste your ${providerInfo.name} API key...`}
+                className="w-full px-3 py-2.5 pr-10 border border-slate-300 rounded bg-white text-slate-900 focus:outline-none focus:border-emerald-600 text-xs font-mono"
               />
               <button
+                type="button"
                 onClick={() => setShowKey(!showKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800"
               >
-                <FiEye size={18} />
+                <FiEye size={16} />
               </button>
             </div>
-            <p className="text-xs text-gray-400 mt-1">
-              🔒 Your API key is stored locally in your browser and never sent to our servers.
+            <p className="text-[11px] text-slate-500 mt-1 font-mono">
+              🔒 API Key stored locally in browser session storage. Never transmitted to third party servers.
             </p>
           </div>
 
           {/* Model Selection */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">
-              Vision Model
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+              3. Vision Model Selection
             </label>
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
               {availableModels.map(model => (
                 <button
                   key={model.id}
                   onClick={() => setLocalConfig(prev => ({ ...prev, modelId: model.id }))}
-                  className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
+                  className={`w-full text-left p-3 rounded border transition-all ${
                     localConfig.modelId === model.id
-                      ? 'border-purple-500 bg-purple-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-emerald-600 bg-emerald-50/80 shadow-xs'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className={`font-bold text-sm ${
-                          localConfig.modelId === model.id ? 'text-purple-700' : 'text-gray-800'
+                        <span className={`font-mono font-bold text-xs ${
+                          localConfig.modelId === model.id ? 'text-emerald-950' : 'text-slate-900'
                         }`}>
                           {model.name}
                         </span>
                         {model.free && (
-                          <span className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                          <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">
                             FREE
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{model.description}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                      <p className="text-xs text-slate-600 mt-1">{model.description}</p>
+                      <div className="flex items-center gap-3 mt-1.5 text-[11px] font-mono text-slate-500">
+                        <span className="flex items-center gap-1">
                           <FiZap size={10} /> {model.strengths}
                         </span>
+                        <span>Context: {model.contextWindow}</span>
                       </div>
-                      <span className="text-[10px] text-gray-400">
-                        Context: {model.contextWindow}
-                      </span>
                     </div>
                     {localConfig.modelId === model.id && (
-                      <FiCheck className="text-purple-600 mt-1 flex-shrink-0" size={18} />
+                      <FiCheck className="text-emerald-700 shrink-0 mt-0.5" size={16} />
                     )}
                   </div>
                 </button>
@@ -201,108 +203,55 @@ export default function SettingsPanel({ isOpen, onClose, config, onSave }: Setti
             </div>
           </div>
 
-          {/* Test Connection */}
-          <div className="bg-gray-50 rounded-xl p-4">
+          {/* Test Connection Section */}
+          <div className="bg-white rounded border border-slate-200 p-3.5">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-bold text-sm text-gray-700">Test Connection</h4>
-                <p className="text-xs text-gray-500">Verify your API key works</p>
+                <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider">Test Provider Connection</h4>
+                <p className="text-xs text-slate-500">Verify key validity before saving</p>
               </div>
               <button
                 onClick={handleTest}
                 disabled={testing || !localConfig.apiKey}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-semibold font-mono disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                {testing ? 'Testing...' : 'Test'}
+                {testing ? 'Testing...' : 'Test Connection'}
               </button>
             </div>
             {testResult && (
-              <div className={`mt-3 flex items-center gap-2 text-sm ${
-                testResult.success ? 'text-green-600' : 'text-red-600'
+              <div className={`mt-2.5 text-xs font-mono p-2 rounded border flex items-center gap-2 ${
+                testResult.success
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold'
+                  : 'bg-red-50 border-red-300 text-red-950 font-bold'
               }`}>
-                {testResult.success ? <FiCheck /> : <FiAlertCircle />}
+                {testResult.success ? <FiCheck size={14} /> : <FiAlertCircle size={14} />}
                 {testResult.message}
               </div>
             )}
           </div>
-
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <h4 className="font-bold text-sm text-blue-800 mb-2">💡 How to get API keys:</h4>
-            <div className="text-xs text-blue-700 space-y-2">
-              {localConfig.provider === 'huggingface' && (
-                <>
-                  <p>1. Go to <a href="https://huggingface.co" target="_blank" rel="noopener noreferrer" className="underline font-medium">huggingface.co</a> and create a free account</p>
-                  <p>2. Go to Settings → Access Tokens</p>
-                  <p>3. Create a new token with "Read" access</p>
-                  <p>4. Free tier has rate limits but works great for learning!</p>
-                </>
-              )}
-              {localConfig.provider === 'openai' && (
-                <>
-                  <p>1. Go to <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="underline font-medium">platform.openai.com</a></p>
-                  <p>2. Create an account and add billing (pay-as-you-go)</p>
-                  <p>3. Go to API Keys and create a new key</p>
-                  <p>4. GPT-4o-mini is very affordable (~$0.15/1M input tokens)</p>
-                </>
-              )}
-              {localConfig.provider === 'anthropic' && (
-                <>
-                  <p>1. Go to <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="underline font-medium">console.anthropic.com</a></p>
-                  <p>2. Create an account and add credits</p>
-                  <p>3. Go to Settings → API Keys</p>
-                  <p>4. Claude is excellent at patient math tutoring</p>
-                </>
-              )}
-              {localConfig.provider === 'google' && (
-                <>
-                  <p>1. Go to <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="underline font-medium">aistudio.google.com</a></p>
-                  <p>2. Sign in with Google account</p>
-                  <p>3. Click "Get API Key" → Create API Key</p>
-                  <p>4. Gemini has a generous free tier!</p>
-                </>
-              )}
-              {localConfig.provider === 'together' && (
-                <>
-                  <p>1. Go to <a href="https://api.together.xyz" target="_blank" rel="noopener noreferrer" className="underline font-medium">api.together.xyz</a></p>
-                  <p>2. Create an account</p>
-                  <p>3. Go to Settings → API Keys</p>
-                  <p>4. Access open-source vision models</p>
-                </>
-              )}
-              {localConfig.provider === 'openrouter' && (
-                <>
-                  <p>1. Go to <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="underline font-medium">openrouter.ai</a></p>
-                  <p>2. Create an account (some models are FREE)</p>
-                  <p>3. Go to Keys → Create Key</p>
-                  <p>4. Access many models through one API, including free options!</p>
-                </>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-5 flex items-center justify-between rounded-b-2xl">
+        {/* Modal Footer Controls */}
+        <div className="bg-slate-100 border-t border-slate-200 p-4 flex items-center justify-between shrink-0">
           <button
             onClick={handleDisable}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm font-medium transition-colors"
+            className="px-3 py-1.5 text-slate-600 hover:text-slate-900 text-xs font-medium font-mono transition-colors"
           >
-            Use Mock AI
+            Use Fallback Offline AI
           </button>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors"
+              className="px-4 py-1.5 border border-slate-300 rounded bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={!localConfig.apiKey || !localConfig.modelId}
-              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-medium hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
+              className="px-5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold font-mono disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-xs"
             >
-              Save & Enable AI
+              Save & Activate Provider
             </button>
           </div>
         </div>

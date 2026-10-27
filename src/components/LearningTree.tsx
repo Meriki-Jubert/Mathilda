@@ -1,5 +1,6 @@
-import { FiLock, FiCheck, FiPlay } from 'react-icons/fi';
+import { FiLock, FiCheck, FiPlay, FiAward, FiZap, FiBookOpen } from 'react-icons/fi';
 import { Unit } from '../data/curriculum';
+import { jungleFruits, jungleZoneLogs } from '../data/jungleLore';
 
 interface LearningTreeProps {
   units: Unit[];
@@ -9,6 +10,7 @@ interface LearningTreeProps {
   onSelectSkill: (unitId: string, skillId: string) => void;
   totalXP: number;
   streakDays?: number;
+  onOpenBackpack: () => void;
 }
 
 export default function LearningTree({
@@ -19,8 +21,24 @@ export default function LearningTree({
   onSelectSkill,
   totalXP,
   streakDays = 0,
+  onOpenBackpack,
 }: LearningTreeProps) {
   const allSkillIds = units.flatMap(u => u.skills.map(s => s.id));
+
+  // Determine harvested fruits
+  const collectedUnitIds = new Set<string>();
+  completedSkills.forEach(skillId => {
+    const match = skillId.match(/skill-(\d+)\./);
+    if (match) {
+      collectedUnitIds.add(`unit-${match[1]}`);
+    }
+  });
+
+  const totalFruitsCount = Object.keys(jungleFruits).length;
+  const harvestedCount = Object.values(jungleFruits).filter(fruit => collectedUnitIds.has(fruit.zoneId)).length;
+  const totalStamina = Object.values(jungleFruits)
+    .filter(fruit => collectedUnitIds.has(fruit.zoneId))
+    .reduce((sum, f) => sum + f.staminaBoost, 100);
 
   const getOverallProgress = () => {
     const totalSkills = allSkillIds.length;
@@ -29,172 +47,193 @@ export default function LearningTree({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 pb-24">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans pb-24">
+      {/* Expedition Header Banner */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-amber-950 text-slate-100 border-b border-amber-900/40 sticky top-12 z-20 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">🌳 Math Mastery Tree</h1>
-              <p className="text-sm text-gray-500">HND Discrete Mathematics</p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-300 bg-amber-950/80 border border-amber-600/40 px-2 py-0.5 rounded">
+                  Cameroon HND Expedition Map
+                </span>
+              </div>
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                <span>🌴</span> Mathilda: The Jungle of Equations
+              </h1>
+              <p className="text-xs text-stone-300 mt-0.5">Explore 12 mathematical jungle zones, harvest Knowledge Fruits, and master Cameroon HND exams</p>
             </div>
-            <div className="flex items-center gap-4">
-              {streakDays > 0 && (
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">Streak</p>
-                  <p className="text-xl font-bold text-orange-500">🔥 {streakDays}</p>
+
+            <div className="flex items-center gap-2.5">
+              {/* Backpack Button */}
+              <button
+                onClick={onOpenBackpack}
+                className="bg-amber-900/60 hover:bg-amber-900 border border-amber-500/50 text-amber-200 px-3 py-1.5 rounded flex items-center gap-2 transition-all shadow-xs"
+              >
+                <span className="text-lg">🎒</span>
+                <div className="text-left font-mono leading-tight">
+                  <p className="text-[10px] uppercase font-bold text-amber-300">Backpack</p>
+                  <p className="text-xs font-bold text-white">{harvestedCount}/{totalFruitsCount} Fruits</p>
                 </div>
-              )}
-              <div className="text-right">
-                <p className="text-sm text-gray-500">Total XP</p>
-                <p className="text-xl font-bold text-purple-600">{totalXP} ⭐</p>
+              </button>
+
+              {/* Stamina Meter */}
+              <div className="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded text-right font-mono">
+                <p className="text-[10px] uppercase font-bold text-stone-400 flex items-center justify-end gap-1">
+                  <FiZap className="text-amber-400" size={12} /> Stamina
+                </p>
+                <p className="text-xs font-bold text-amber-400">{totalStamina} PTS</p>
+              </div>
+
+              {/* XP Meter */}
+              <div className="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded text-right font-mono">
+                <p className="text-[10px] uppercase font-bold text-stone-400 flex items-center justify-end gap-1">
+                  <FiAward className="text-emerald-400" size={12} /> Mastery XP
+                </p>
+                <p className="text-xs font-bold text-emerald-400">{totalXP} XP</p>
               </div>
             </div>
           </div>
-          {/* Overall progress */}
+
+          {/* Overall Progress Trail Bar */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-slate-800 rounded overflow-hidden border border-slate-700">
               <div
-                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-700"
+                className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-emerald-400 transition-all duration-500"
                 style={{ width: `${getOverallProgress()}%` }}
               />
             </div>
-            <span className="text-sm font-bold text-gray-600">{getOverallProgress()}%</span>
+            <span className="text-xs font-mono font-bold text-emerald-400">{getOverallProgress()}% Jungle Explored</span>
           </div>
         </div>
       </div>
 
-      {/* Units */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Jungle Zones List */}
+      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {units.map((unit, unitIndex) => {
           const unitSkillIds = unit.skills.map(s => s.id);
           const unitCompleted = unitSkillIds.filter(id => completedSkills.includes(id)).length;
           const unitTotal = unitSkillIds.length;
           const unitProgress = Math.round((unitCompleted / unitTotal) * 100);
 
+          const zoneFruit = jungleFruits[unit.id];
+          const zoneLog = jungleZoneLogs[unit.id];
+          const isFruitHarvested = collectedUnitIds.has(unit.id);
+
           return (
-            <div key={unit.id} className="mb-10">
-              {/* Unit Header */}
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-xl flex items-center justify-center text-3xl">
-                    {unit.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
-                        Unit {unit.number}
+            <div key={unit.id} className="bg-white rounded border border-stone-300 shadow-xs p-5 relative overflow-hidden">
+              {/* Zone Header Banner */}
+              <div className="flex items-start justify-between gap-4 border-b border-stone-200 pb-3 mb-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[11px] font-mono font-bold uppercase text-stone-800 bg-stone-100 px-2 py-0.5 rounded border border-stone-300">
+                      {zoneLog?.zoneTitle || `Zone ${unit.number}`}
+                    </span>
+                    {unitProgress === 100 && (
+                      <span className="text-[11px] font-mono font-bold text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">
+                        ✓ Zone Mastered
                       </span>
-                      {unitProgress === 100 && (
-                        <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
-                          ✓ Complete
-                        </span>
-                      )}
+                    )}
+                  </div>
+                  <h2 className="text-base font-bold text-stone-900 tracking-tight">{unit.title}</h2>
+                  <p className="text-xs text-stone-600 mt-0.5">{unit.goal}</p>
+                </div>
+
+                {/* Fruit Indicator */}
+                {zoneFruit && (
+                  <div
+                    onClick={onOpenBackpack}
+                    className={`px-3 py-1.5 rounded border cursor-pointer transition-all shrink-0 font-mono text-xs flex items-center gap-2 ${
+                      isFruitHarvested
+                        ? 'bg-amber-50 border-amber-300 text-amber-950 font-bold shadow-xs'
+                        : 'bg-stone-100 border-stone-200 text-stone-400 opacity-60'
+                    }`}
+                    title={isFruitHarvested ? `Harvested: ${zoneFruit.name}` : `Locked: ${zoneFruit.name}`}
+                  >
+                    <span className="text-lg">{zoneFruit.icon}</span>
+                    <div className="text-left hidden sm:block">
+                      <p className="text-[10px] uppercase font-bold text-amber-900">
+                        {isFruitHarvested ? 'Fruit Harvested' : 'Unexplored Fruit'}
+                      </p>
+                      <p className="text-[11px] truncate max-w-[120px]">{zoneFruit.name}</p>
                     </div>
-                    <h2 className="text-lg font-bold text-gray-800 mt-1">{unit.title}</h2>
-                    <p className="text-sm text-gray-500 mt-1">{unit.goal}</p>
                   </div>
-                </div>
-                {/* Unit progress bar */}
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-700"
-                      style={{ width: `${unitProgress}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-medium text-gray-500">
-                    {unitCompleted}/{unitTotal} skills
-                  </span>
-                </div>
+                )}
               </div>
 
-              {/* Skills Path */}
-              <div className="relative">
-                {/* Connecting line */}
-                <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200" />
-                
-                {unit.skills.map((skill, skillIndex) => {
+              {/* Explorer Log Quote */}
+              {zoneLog && (
+                <div className="bg-stone-50 border-l-2 border-amber-800 p-2.5 rounded-r text-xs text-stone-700 italic font-serif mb-4">
+                  {zoneLog.loreQuote}
+                </div>
+              )}
+
+              {/* Module Trails */}
+              <div className="space-y-2.5">
+                {unit.skills.map((skill) => {
                   const globalSkillIndex = allSkillIds.indexOf(skill.id);
                   const unlocked = isSkillUnlocked(globalSkillIndex, allSkillIds);
                   const completed = completedSkills.includes(skill.id);
                   const mastery = getSkillMastery(skill.id);
 
                   return (
-                    <div key={skill.id} className="relative flex items-start gap-6 mb-6 last:mb-0">
-                      {/* Node */}
-                      <div className="relative z-10">
-                        <button
-                          onClick={() => unlocked && onSelectSkill(unit.id, skill.id)}
-                          disabled={!unlocked}
-                          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
-                            completed
-                              ? 'bg-gradient-to-br from-green-400 to-emerald-500 shadow-lg shadow-green-200'
-                              : unlocked
-                              ? 'bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg shadow-purple-200 hover:scale-110 cursor-pointer'
-                              : 'bg-gray-200 cursor-not-allowed'
-                          }`}
-                        >
+                    <div
+                      key={skill.id}
+                      onClick={() => unlocked && onSelectSkill(unit.id, skill.id)}
+                      className={`p-3.5 rounded border transition-all flex items-center justify-between gap-4 cursor-pointer ${
+                        completed
+                          ? 'bg-emerald-50/60 border-emerald-300 hover:bg-emerald-100/60'
+                          : unlocked
+                          ? 'bg-white border-stone-300 hover:border-emerald-600 hover:shadow-xs'
+                          : 'bg-stone-50 border-stone-200 opacity-60 cursor-not-allowed'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
+                          completed
+                            ? 'bg-emerald-700 border-emerald-800 text-white'
+                            : unlocked
+                            ? 'bg-slate-900 border-slate-900 text-white'
+                            : 'bg-stone-200 border-stone-300 text-stone-500'
+                        }`}>
                           {completed ? (
-                            <FiCheck className="text-white" size={24} />
+                            <FiCheck size={16} />
                           ) : unlocked ? (
-                            <FiPlay className="text-white" size={20} />
+                            <FiPlay size={14} className="ml-0.5" />
                           ) : (
-                            <FiLock className="text-gray-400" size={20} />
+                            <FiLock size={14} />
                           )}
-                        </button>
-                        {/* Mastery ring */}
-                        {unlocked && !completed && mastery > 0 && (
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center border-2 border-purple-300">
-                            <span className="text-[10px] font-bold text-purple-600">{mastery}%</span>
-                          </div>
-                        )}
+                        </div>
+                        <div>
+                          <h3 className={`font-semibold text-sm ${completed ? 'text-emerald-950' : unlocked ? 'text-stone-900' : 'text-stone-400'}`}>
+                            {skill.title}
+                          </h3>
+                          <p className={`text-xs ${completed ? 'text-emerald-800' : unlocked ? 'text-stone-600' : 'text-stone-400'}`}>
+                            {skill.description}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Skill Info Card */}
-                      <div
-                        className={`flex-1 rounded-xl p-4 transition-all ${
-                          completed
-                            ? 'bg-green-50 border border-green-200'
-                            : unlocked
-                            ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md cursor-pointer'
-                            : 'bg-gray-50 border border-gray-100 opacity-60'
-                        }`}
-                        onClick={() => unlocked && onSelectSkill(unit.id, skill.id)}
-                      >
-                        <h3 className={`font-bold ${completed ? 'text-green-700' : unlocked ? 'text-gray-800' : 'text-gray-400'}`}>
-                          {skill.title}
-                        </h3>
-                        <p className={`text-sm mt-1 ${completed ? 'text-green-600' : unlocked ? 'text-gray-500' : 'text-gray-400'}`}>
-                          {skill.description}
-                        </p>
+                      <div className="flex items-center gap-3 shrink-0">
                         {unlocked && !completed && mastery > 0 && (
-                          <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full"
-                              style={{ width: `${mastery}%` }}
-                            />
-                          </div>
+                          <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            {mastery}% Mastery
+                          </span>
                         )}
-                        {completed && (
-                          <div className="mt-2 flex items-center gap-1">
-                            <span className="text-xs text-green-600 font-medium">Mastered ✨</span>
-                          </div>
-                        )}
+                        <span className={`text-xs font-mono font-medium px-2.5 py-1 rounded border ${
+                          completed
+                            ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                            : unlocked
+                            ? 'bg-stone-100 text-stone-800 border-stone-300'
+                            : 'bg-stone-100 text-stone-400 border-stone-200'
+                        }`}>
+                          {completed ? 'Trail Completed ✓' : unlocked ? 'Enter Trail →' : 'Locked'}
+                        </span>
                       </div>
                     </div>
                   );
                 })}
               </div>
-
-              {/* Unit separator */}
-              {unitIndex < units.length - 1 && (
-                <div className="flex justify-center my-4">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <span className="text-gray-400 text-xs">•••</span>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}

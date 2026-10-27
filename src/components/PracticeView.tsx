@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiArrowLeft, FiCheck, FiX, FiHelpCircle, FiArrowRight, FiMessageCircle } from 'react-icons/fi';
+import { FiArrowLeft, FiCheck, FiX, FiHelpCircle, FiArrowRight, FiMessageCircle, FiZap } from 'react-icons/fi';
 import { PracticeQuestion } from '../data/curriculum';
 
 interface PracticeViewProps {
@@ -81,7 +81,6 @@ export default function PracticeView({
     setShowResult(true);
     setShowExplanation(true);
 
-    // Log the answer with analytics
     onComplete(question.id, correct, answer, showHint);
   };
 
@@ -99,92 +98,98 @@ export default function PracticeView({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans pb-16">
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-amber-950 text-slate-100 border-b border-amber-900/40 sticky top-12 z-20 shadow-xs">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-mono font-medium text-amber-300 hover:text-white transition-colors"
           >
-            <FiArrowLeft /> Back
+            <FiArrowLeft size={14} /> Back to Trailhead
           </button>
-          <h2 className="text-lg font-bold text-gray-800">Practice Time</h2>
-          <span className="text-sm text-gray-500">
-            {currentQ + 1}/{questions.length}
+          <div className="text-center">
+            <span className="text-[10px] font-mono uppercase font-bold text-amber-300 block">Jungle Practice Trial</span>
+            <h2 className="text-sm font-bold tracking-tight text-white">Knowledge Discovery Trial</h2>
+          </div>
+          <span className="text-xs font-mono font-bold bg-amber-950 border border-amber-600/40 text-amber-300 px-2.5 py-1 rounded">
+            Trial {currentQ + 1} / {questions.length}
           </span>
         </div>
-        <div className="h-1 bg-gray-100">
+        <div className="h-1 bg-slate-800">
           <div
-            className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500"
+            className="h-full bg-amber-500 transition-all duration-300"
             style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }}
           />
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* Question Card */}
-        <div className={`bg-white rounded-2xl p-6 shadow-sm border-2 transition-all duration-500 mb-6 ${
-          showAnswerFlash ? 'border-purple-400 shadow-purple-100 shadow-lg' : 'border-gray-100'
+      {/* Main Trial Workspace */}
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
+        {/* Question Container Card */}
+        <div className={`bg-white rounded border p-6 shadow-xs transition-all duration-300 ${
+          showAnswerFlash ? 'border-amber-500 ring-2 ring-amber-200' : 'border-stone-300'
         }`}>
-          <div className="flex items-center gap-2 mb-4">
-            <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
-              Question {currentQ + 1}
+          <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-stone-200">
+            <span className="text-xs font-mono font-bold text-stone-700 uppercase tracking-wider bg-stone-100 border border-stone-300 px-2.5 py-0.5 rounded">
+              Trial Challenge #{currentQ + 1}
             </span>
             {isAlreadyCompleted && (
-              <span className="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">
-                ✓ Previously correct
+              <span className="text-xs font-mono font-bold text-emerald-900 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded">
+                ✓ Previously Solved
               </span>
             )}
             {showAnswerFlash && (
-              <span className="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-medium animate-pulse">
-                🤖 AI filled answer
+              <span className="text-xs font-mono font-bold text-amber-950 bg-amber-200 border border-amber-400 px-2.5 py-0.5 rounded animate-pulse">
+                🤖 AI Auto-Filled Answer
               </span>
             )}
           </div>
-          <h3 className="text-xl font-bold text-gray-800 mb-6">{question.question}</h3>
 
-          {/* Multiple Choice */}
+          <h3 className="text-base font-bold font-mono text-stone-900 leading-relaxed mb-6">
+            {question.question}
+          </h3>
+
+          {/* Multiple Choice Options */}
           {question.type === 'multiple-choice' && question.options && (
-            <div className="space-y-3">
+            <div className="space-y-2.5 font-mono text-xs">
               {question.options.map((option, i) => (
                 <button
                   key={i}
                   onClick={() => !showResult && setSelectedOption(option)}
                   disabled={showResult}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                  className={`w-full text-left p-3.5 rounded border transition-all flex items-center justify-between ${
                     selectedOption === option
                       ? showResult
                         ? option === question.correctAnswer
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-red-500 bg-red-50'
-                        : 'border-purple-500 bg-purple-50'
+                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold'
+                          : 'border-red-600 bg-red-50 text-red-950 font-bold'
+                        : 'border-slate-900 bg-slate-100 text-slate-900 font-bold'
                       : showResult && option === question.correctAnswer
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold'
+                      : 'border-stone-300 bg-white text-stone-800 hover:border-stone-400'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    <span className={`w-7 h-7 rounded border flex items-center justify-center text-xs font-bold shrink-0 ${
                       selectedOption === option
                         ? showResult
                           ? option === question.correctAnswer
-                            ? 'bg-green-500 text-white'
-                            : 'bg-red-500 text-white'
-                          : 'bg-purple-500 text-white'
-                        : 'bg-gray-100 text-gray-600'
+                            ? 'bg-emerald-700 border-emerald-800 text-white'
+                            : 'bg-red-700 border-red-800 text-white'
+                          : 'bg-slate-900 border-slate-900 text-white'
+                        : 'bg-stone-100 border-stone-300 text-stone-700'
                     }`}>
                       {String.fromCharCode(65 + i)}
                     </span>
-                    <span className="text-gray-700 font-medium">{option}</span>
-                    {showResult && option === question.correctAnswer && (
-                      <FiCheck className="ml-auto text-green-600" size={20} />
-                    )}
-                    {showResult && selectedOption === option && option !== question.correctAnswer && (
-                      <FiX className="ml-auto text-red-600" size={20} />
-                    )}
+                    <span>{option}</span>
                   </div>
+                  {showResult && option === question.correctAnswer && (
+                    <FiCheck className="text-emerald-800" size={18} />
+                  )}
+                  {showResult && selectedOption === option && option !== question.correctAnswer && (
+                    <FiX className="text-red-700" size={18} />
+                  )}
                 </button>
               ))}
             </div>
@@ -192,116 +197,114 @@ export default function PracticeView({
 
           {/* Text Input */}
           {question.type === 'text' && (
-            <div className="space-y-4">
+            <div className="space-y-3 font-mono">
               <input
                 type="text"
                 value={userAnswer}
                 onChange={e => setUserAnswer(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && userAnswer.trim() && !showResult && checkAnswer()}
                 disabled={showResult}
-                placeholder="Type your answer here..."
-                className={`w-full p-4 rounded-xl border-2 text-lg focus:outline-none transition-all ${
+                placeholder="Enter numerical answer or algebraic expression..."
+                className={`w-full p-3.5 rounded border text-xs focus:outline-none transition-all ${
                   showAnswerFlash
-                    ? 'border-purple-400 bg-purple-50 ring-2 ring-purple-200'
+                    ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-200 text-stone-900 font-bold'
                     : showResult
                     ? isCorrect
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-red-500 bg-red-50'
-                    : 'border-gray-200 focus:border-purple-400'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold'
+                      : 'border-red-600 bg-red-50 text-red-950 font-bold'
+                    : 'border-stone-300 bg-white text-stone-900 focus:border-slate-900'
                 }`}
               />
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-gray-400">
-                  💡 Snap a photo of your work → send to AI tutor (🤖) → answer auto-fills here!
-                </p>
-                <div className="flex items-center gap-1 text-xs text-purple-500">
+              <div className="flex items-center justify-between text-[11px] text-stone-500">
+                <p>💡 Snap photo of handwritten work → send to AI (🤖) → auto-fills answer!</p>
+                <div className="flex items-center gap-1 font-bold text-emerald-800">
                   <FiMessageCircle size={12} />
-                  <span>AI ready</span>
+                  <span>AI Assistant Ready</span>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Hint Button */}
+        {/* Hint Request */}
         {!showResult && !showHint && (
           <button
             onClick={() => setShowHint(true)}
-            className="flex items-center gap-2 text-amber-600 hover:text-amber-700 mb-4 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-900 bg-amber-50 border border-amber-300 px-3 py-1.5 rounded transition-colors"
           >
-            <FiHelpCircle size={18} /> Need a hint?
+            <FiHelpCircle size={14} /> Request Explorer Hint
           </button>
         )}
 
-        {/* Hint */}
+        {/* Hint Box */}
         {showHint && !showResult && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 animate-fadeIn">
-            <p className="text-amber-800 text-sm">
-              💡 <strong>Hint:</strong> {question.hint}
-            </p>
+          <div className="bg-amber-50 border border-amber-300 rounded p-4 text-xs text-amber-950 font-mono animate-fadeIn">
+            <strong>Explorer Hint:</strong> {question.hint}
           </div>
         )}
 
-        {/* Result */}
+        {/* Result Banner with Stamina & Fruit Reward */}
         {showResult && (
-          <div className={`rounded-xl p-4 mb-4 animate-fadeIn ${
-            isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+          <div className={`rounded border p-4 animate-fadeIn font-mono text-xs ${
+            isCorrect
+              ? 'bg-emerald-50 border-emerald-400 text-emerald-950'
+              : 'bg-red-50 border-red-400 text-red-950'
           }`}>
-            <div className="flex items-center gap-2 mb-2">
-              {isCorrect ? (
-                <>
-                  <FiCheck className="text-green-600" size={20} />
-                  <span className="font-bold text-green-700">Correct! 🎉</span>
-                </>
-              ) : (
-                <>
-                  <FiX className="text-red-600" size={20} />
-                  <span className="font-bold text-red-700">Not quite right</span>
-                </>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {isCorrect ? (
+                  <>
+                    <FiCheck className="text-emerald-800" size={18} />
+                    <span className="font-extrabold text-sm text-emerald-950">Trial Challenge Solved! ✓</span>
+                  </>
+                ) : (
+                  <>
+                    <FiX className="text-red-700" size={18} />
+                    <span className="font-extrabold text-sm text-red-950">Incorrect Solution</span>
+                  </>
+                )}
+              </div>
+              {isCorrect && (
+                <span className="bg-amber-200 border border-amber-400 text-amber-950 font-bold px-2.5 py-0.5 rounded flex items-center gap-1">
+                  <FiZap size={12} /> +20 Stamina
+                </span>
               )}
             </div>
             {!isCorrect && (
-              <p className="text-gray-700 text-sm mb-2">
-                The correct answer is: <strong>{question.correctAnswer}</strong>
+              <p className="mt-1">
+                Expected Answer: <strong className="text-stone-900">{question.correctAnswer}</strong>
               </p>
             )}
           </div>
         )}
 
-        {/* Explanation */}
+        {/* Step Explanation Card */}
         {showExplanation && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 animate-fadeIn">
-            <p className="text-blue-800 text-sm">
-              📖 <strong>Explanation:</strong> {question.explanation}
-            </p>
-            {!isCorrect && (
-              <p className="text-blue-600 text-xs mt-2 flex items-center gap-1">
-                <FiMessageCircle size={12} />
-                Ask the AI tutor for a deeper explanation! It knows what you got wrong.
-              </p>
-            )}
+          <div className="bg-stone-100 border border-stone-300 rounded p-4 text-xs text-stone-800 space-y-1.5 animate-fadeIn font-mono">
+            <div><strong>Solution Explanation:</strong></div>
+            <p className="leading-relaxed">{question.explanation}</p>
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between">
+        {/* Action Controls */}
+        <div className="flex items-center justify-between pt-4 border-t border-stone-300 font-mono text-xs">
           {!showResult ? (
             <button
               onClick={checkAnswer}
               disabled={question.type === 'multiple-choice' ? !selectedOption : !userAnswer.trim()}
-              className="ml-auto flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
+              className="ml-auto flex items-center gap-1.5 px-5 py-2.5 rounded bg-amber-700 hover:bg-amber-800 text-white font-bold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-xs"
             >
-              <FiCheck /> Check Answer
+              <FiCheck size={14} /> Submit Answer
             </button>
           ) : (
             <button
               onClick={nextQuestion}
-              className="ml-auto flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md"
+              className="ml-auto flex items-center gap-1.5 px-5 py-2.5 rounded bg-slate-900 hover:bg-slate-800 text-white font-bold uppercase tracking-wider transition-colors shadow-xs"
             >
               {currentQ < questions.length - 1 ? (
-                <>Next Question <FiArrowRight /></>
+                <>Next Trial Challenge <FiArrowRight size={14} /></>
               ) : (
-                <>Finish Practice <FiCheck /></>
+                <>Finish Trial & Harvest Fruit <FiCheck size={14} /></>
               )}
             </button>
           )}

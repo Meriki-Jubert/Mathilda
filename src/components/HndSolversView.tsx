@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FiArrowLeft, FiSliders, FiCpu } from 'react-icons/fi';
 
 interface HndSolversViewProps {
   onBack: () => void;
@@ -33,7 +34,6 @@ export default function HndSolversView({ onBack }: HndSolversViewProps) {
   const [upperB, setUpperB] = useState<number>(2);
   const [numN, setNumN] = useState<number>(4);
 
-  // Calculate Trapezoidal and Simpson for f(x) = x^2
   const stepH = (upperB - lowerA) / (numN || 1);
   const f = (x: number) => x * x;
 
@@ -51,107 +51,112 @@ export default function HndSolversView({ onBack }: HndSolversViewProps) {
   const simpVal = (stepH / 3) * simpSum;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 text-slate-800">
-      <div className="max-w-4xl mx-auto mb-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans p-4 md:p-8">
+      <div className="max-w-4xl mx-auto mb-6 bg-white p-6 rounded border border-stone-200 shadow-xs">
         <button
           onClick={onBack}
-          className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 mb-2"
+          className="text-xs font-mono font-medium text-emerald-800 hover:text-emerald-900 flex items-center gap-1 mb-2"
         >
-          ← Back to Learning Path
+          <FiArrowLeft size={14} /> Back to Syllabus
         </button>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
-          <span>🧮</span> Interactive HND Step Verifiers & Calculators
+        <h1 className="text-xl md:text-2xl font-bold text-stone-900 tracking-tight flex items-center gap-2">
+          <FiSliders className="text-emerald-700" size={22} />
+          Interactive Mathematical Step Verifiers
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Verify your hand calculations step-by-step before your exam
+        <p className="text-xs text-stone-600 mt-1">
+          Perform step-by-step verification of hand calculations for complex numbers, matrix operations, and numerical integration
         </p>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-200 mt-6 gap-6">
+        <div className="flex border-b border-stone-200 mt-6 gap-6 font-mono text-xs">
           <button
             onClick={() => setActiveTab('complex')}
-            className={`pb-3 text-sm font-semibold transition-all ${
+            className={`pb-2.5 font-bold transition-all ${
               activeTab === 'complex'
-                ? 'border-b-2 border-emerald-600 text-emerald-700'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'border-b-2 border-emerald-700 text-emerald-900'
+                : 'text-stone-500 hover:text-stone-800'
             }`}
           >
-            🔮 Complex Number Polar Converter
+            Complex Number Converter
           </button>
           <button
             onClick={() => setActiveTab('matrix')}
-            className={`pb-3 text-sm font-semibold transition-all ${
+            className={`pb-2.5 font-bold transition-all ${
               activeTab === 'matrix'
-                ? 'border-b-2 border-emerald-600 text-emerald-700'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'border-b-2 border-emerald-700 text-emerald-900'
+                : 'text-stone-500 hover:text-stone-800'
             }`}
           >
-            🔢 2x2 Matrix Inverse & Determinant
+            2x2 Matrix Inverter
           </button>
           <button
             onClick={() => setActiveTab('numerical')}
-            className={`pb-3 text-sm font-semibold transition-all ${
+            className={`pb-2.5 font-bold transition-all ${
               activeTab === 'numerical'
-                ? 'border-b-2 border-emerald-600 text-emerald-700'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'border-b-2 border-emerald-700 text-emerald-900'
+                : 'text-stone-500 hover:text-stone-800'
             }`}
           >
-            🎯 Numerical Integrator (Trapezoidal / Simpson)
+            Numerical Integrator
           </button>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto">
         {activeTab === 'complex' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">z = a + bi → r ∠ θ Converter</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="bg-white rounded border border-stone-200 p-6 shadow-xs space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-900">z = a + bi → Polar / Exponential Form</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Real Part (a)</label>
+                <label className="block text-xs font-bold text-stone-700 mb-1">Real Part (a)</label>
                 <input
                   type="number"
                   step="any"
                   value={realPart}
                   onChange={e => setRealPart(parseFloat(e.target.value) || 0)}
-                  className="w-full p-2.5 border rounded-xl text-sm font-mono"
+                  className="w-full p-2 border border-stone-300 rounded text-xs"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Imaginary Part (b)</label>
+                <label className="block text-xs font-bold text-stone-700 mb-1">Imaginary Part (b)</label>
                 <input
                   type="number"
                   step="any"
                   value={imagPart}
                   onChange={e => setImagPart(parseFloat(e.target.value) || 0)}
-                  className="w-full p-2.5 border rounded-xl text-sm font-mono"
+                  className="w-full p-2 border border-stone-300 rounded text-xs"
                 />
               </div>
             </div>
 
-            <div className="bg-slate-900 text-slate-100 p-5 rounded-xl font-mono text-sm space-y-2">
-              <div className="text-emerald-400 font-bold border-b border-slate-800 pb-2">Step Breakdown:</div>
+            <div className="bg-slate-900 text-slate-100 p-4 rounded border border-slate-800 font-mono text-xs space-y-2">
+              <div className="text-emerald-400 font-bold border-b border-slate-800 pb-1.5 flex items-center gap-1.5">
+                <FiCpu size={14} /> Evaluation Breakdown:
+              </div>
               <div>z = {realPart} + {imagPart}i</div>
               <div>Modulus r = √({realPart}² + {imagPart}²) = <span className="text-emerald-400 font-bold">{mod.toFixed(4)}</span></div>
               <div>Argument θ = arctan({imagPart} / {realPart}) = <span className="text-emerald-400 font-bold">{argRad.toFixed(4)} rad</span> ({argDeg.toFixed(2)}°)</div>
               <div className="text-emerald-300 font-bold pt-2 border-t border-slate-800">
-                Exponential / Polar: {mod.toFixed(4)} e^({argRad.toFixed(4)}i) = {mod.toFixed(4)} ∠ {argDeg.toFixed(2)}°
+                Exponential Polar: {mod.toFixed(4)} e^({argRad.toFixed(4)}i) = {mod.toFixed(4)} ∠ {argDeg.toFixed(2)}°
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'matrix' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">2x2 Matrix Determinant & Inverse</h2>
-            <div className="grid grid-cols-2 gap-3 max-w-xs mb-6">
-              <input type="number" value={m11} onChange={e => setM11(parseFloat(e.target.value) || 0)} className="p-2 border rounded font-mono text-center" />
-              <input type="number" value={m12} onChange={e => setM12(parseFloat(e.target.value) || 0)} className="p-2 border rounded font-mono text-center" />
-              <input type="number" value={m21} onChange={e => setM21(parseFloat(e.target.value) || 0)} className="p-2 border rounded font-mono text-center" />
-              <input type="number" value={m22} onChange={e => setM22(parseFloat(e.target.value) || 0)} className="p-2 border rounded font-mono text-center" />
+          <div className="bg-white rounded border border-stone-200 p-6 shadow-xs space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-900">2x2 Matrix Determinant & Inverse Matrix</h2>
+            <div className="grid grid-cols-2 gap-2 max-w-xs font-mono">
+              <input type="number" value={m11} onChange={e => setM11(parseFloat(e.target.value) || 0)} className="p-2 border border-stone-300 rounded text-xs text-center" />
+              <input type="number" value={m12} onChange={e => setM12(parseFloat(e.target.value) || 0)} className="p-2 border border-stone-300 rounded text-xs text-center" />
+              <input type="number" value={m21} onChange={e => setM21(parseFloat(e.target.value) || 0)} className="p-2 border border-stone-300 rounded text-xs text-center" />
+              <input type="number" value={m22} onChange={e => setM22(parseFloat(e.target.value) || 0)} className="p-2 border border-stone-300 rounded text-xs text-center" />
             </div>
 
-            <div className="bg-slate-900 text-slate-100 p-5 rounded-xl font-mono text-sm space-y-2">
-              <div className="text-emerald-400 font-bold border-b border-slate-800 pb-2">Results:</div>
+            <div className="bg-slate-900 text-slate-100 p-4 rounded border border-slate-800 font-mono text-xs space-y-2">
+              <div className="text-emerald-400 font-bold border-b border-slate-800 pb-1.5 flex items-center gap-1.5">
+                <FiCpu size={14} /> Evaluation Breakdown:
+              </div>
               <div>det(A) = ({m11})({m22}) - ({m12})({m21}) = <span className="text-emerald-400 font-bold">{det}</span></div>
               {invExists ? (
                 <>
@@ -161,44 +166,44 @@ export default function HndSolversView({ onBack }: HndSolversViewProps) {
                   </div>
                 </>
               ) : (
-                <div className="text-red-400 font-bold mt-2">Matrix is singular (det = 0). No inverse exists!</div>
+                <div className="text-red-400 font-bold mt-2">Matrix is singular (det = 0). Inverse does not exist.</div>
               )}
             </div>
           </div>
         )}
 
         {activeTab === 'numerical' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-900 mb-2">Numerical Integration Verifier: ∫[a to b] x² dx</h2>
-            <p className="text-xs text-slate-500 mb-4">Evaluates ∫ x² dx using Trapezoidal and Simpson\'s 1/3 rules.</p>
+          <div className="bg-white rounded border border-stone-200 p-6 shadow-xs space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-900">Numerical Integrator: ∫[a to b] x² dx</h2>
+            <p className="text-xs font-mono text-stone-500">Evaluates ∫ x² dx using Trapezoidal and Simpson\'s 1/3 rules.</p>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-3 font-mono">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Lower Bound a</label>
-                <input type="number" value={lowerA} onChange={e => setLowerA(parseFloat(e.target.value) || 0)} className="w-full p-2 border rounded font-mono" />
+                <label className="block text-xs font-bold text-stone-700 mb-1">Lower Bound a</label>
+                <input type="number" value={lowerA} onChange={e => setLowerA(parseFloat(e.target.value) || 0)} className="w-full p-2 border border-stone-300 rounded text-xs" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Upper Bound b</label>
-                <input type="number" value={upperB} onChange={e => setUpperB(parseFloat(e.target.value) || 0)} className="w-full p-2 border rounded font-mono" />
+                <label className="block text-xs font-bold text-stone-700 mb-1">Upper Bound b</label>
+                <input type="number" value={upperB} onChange={e => setUpperB(parseFloat(e.target.value) || 0)} className="w-full p-2 border border-stone-300 rounded text-xs" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Subintervals n (Even for Simpson)</label>
-                <input type="number" min="2" step="2" value={numN} onChange={e => setNumN(parseInt(e.target.value) || 2)} className="w-full p-2 border rounded font-mono" />
+                <label className="block text-xs font-bold text-stone-700 mb-1">Subintervals n (Even)</label>
+                <input type="number" min="2" step="2" value={numN} onChange={e => setNumN(parseInt(e.target.value) || 2)} className="w-full p-2 border border-stone-300 rounded text-xs" />
               </div>
             </div>
 
-            <div className="bg-slate-900 text-slate-100 p-5 rounded-xl font-mono text-sm space-y-3">
+            <div className="bg-slate-900 text-slate-100 p-4 rounded border border-slate-800 font-mono text-xs space-y-2">
               <div>Step size h = ({upperB} - {lowerA}) / {numN} = <span className="text-emerald-400 font-bold">{stepH.toFixed(4)}</span></div>
-              <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
-                <div className="text-xs font-bold text-slate-400">TRAPEZOIDAL RULE:</div>
-                <div className="text-emerald-300 text-base font-bold mt-1">Integral ≈ {trapVal.toFixed(4)}</div>
+              <div className="p-3 bg-slate-800 rounded border border-slate-700 space-y-1">
+                <div className="text-[11px] font-bold text-slate-400">TRAPEZOIDAL RULE RESULT:</div>
+                <div className="text-emerald-300 text-sm font-bold">Integral ≈ {trapVal.toFixed(4)}</div>
               </div>
-              <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
-                <div className="text-xs font-bold text-slate-400">SIMPSON\'S 1/3 RULE:</div>
-                <div className="text-emerald-300 text-base font-bold mt-1">Integral ≈ {simpVal.toFixed(4)}</div>
+              <div className="p-3 bg-slate-800 rounded border border-slate-700 space-y-1">
+                <div className="text-[11px] font-bold text-slate-400">SIMPSON\'S 1/3 RULE RESULT:</div>
+                <div className="text-emerald-300 text-sm font-bold">Integral ≈ {simpVal.toFixed(4)}</div>
               </div>
-              <div className="text-xs text-slate-400">
-                Exact integral: [(b³ - a³) / 3] = {((upperB ** 3 - lowerA ** 3) / 3).toFixed(4)}
+              <div className="text-[11px] text-slate-400">
+                Exact analytical integral: [(b³ - a³) / 3] = {((upperB ** 3 - lowerA ** 3) / 3).toFixed(4)}
               </div>
             </div>
           </div>

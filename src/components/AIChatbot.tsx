@@ -103,7 +103,6 @@ function getMockResponse(message: string, currentTopic: string): string {
 export default function AIChatbot({
   currentTopic,
   currentUnit,
-  currentSkillId,
   currentQuestion,
   config,
   isAIEnabled,
@@ -120,8 +119,8 @@ export default function AIChatbot({
       id: '1',
       role: 'assistant',
       content: isAIEnabled
-        ? `Hi! 👋 I'm your Math Buddy AI, powered by ${PROVIDER_INFO[config.provider].name}. I can read images of your work and help fill in answers! What do you need?`
-        : `Hi! 👋 I'm your Math Buddy. Connect a real AI in Settings (⚙️) for smart help & image reading! What topic are you working on?`,
+        ? `Hi! 👋 I'm your Math Buddy AI, powered by ${PROVIDER_INFO[config.provider].name}. I can read photos of your handwritten work and step-check your solutions! What do you need help with?`
+        : `Hi! 👋 I'm your Math Buddy. Connect a real AI in Settings (⚙️) for smart step assistance & vision reading! What topic are you working on?`,
       timestamp: new Date(),
     },
   ]);
@@ -140,7 +139,7 @@ export default function AIChatbot({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 4 * 1024 * 1024) {
-        alert('Image too large! Please use an image under 4MB.');
+        alert('Image size exceeds 4MB limit.');
         return;
       }
       const reader = new FileReader();
@@ -152,7 +151,6 @@ export default function AIChatbot({
     e.target.value = '';
   };
 
-  // Extract answer from AI response (looks for [ANSWER:...] pattern)
   const extractAnswerFromResponse = (response: string): string | null => {
     const match = response.match(/\[ANSWER:\s*(.*?)\]/i);
     return match ? match[1].trim() : null;
@@ -165,7 +163,7 @@ export default function AIChatbot({
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input || '(sent an image)',
+      content: input || '(attached photo)',
       imageData: attachedImage || undefined,
       timestamp: new Date(),
     };
@@ -177,7 +175,6 @@ export default function AIChatbot({
     setAttachedImage(null);
     setIsLoading(true);
 
-    // Log the chat
     onChatLogged?.(currentInput || '(image)', !!currentImage);
 
     const loadingId = (Date.now() + 1).toString();
@@ -197,7 +194,6 @@ export default function AIChatbot({
           let promptText = '';
           
           if (isInPracticeMode && currentQuestion) {
-            // Practice mode: extract answer from image
             promptText = `The student is working on this question: "${currentQuestion}"
 
 They sent an image of their handwritten work/answer. Please:
@@ -224,7 +220,6 @@ Be specific about what you read in the image. Format math clearly.`;
           content = currentInput;
         }
 
-        // Build conversation history with context
         const history = messages
           .filter(m => !m.isLoading && !m.error)
           .slice(-10)
@@ -235,10 +230,9 @@ Be specific about what you read in the image. Format math clearly.`;
               : m.content,
           }));
 
-        // Prepend AI context about the student
         const contextMessage = {
           role: 'user' as const,
-          content: `[System: This is context about the student - do NOT respond to this, just use it for future responses]${aiContext}`,
+          content: `[System: Context about student]${aiContext}`,
         };
 
         const response = await callAI(config, [
@@ -247,9 +241,7 @@ Be specific about what you read in the image. Format math clearly.`;
           { role: 'user' as const, content },
         ]);
 
-        // Check if response contains an extracted answer
         const extractedAnswer = extractAnswerFromResponse(response.content);
-        // Clean the displayed content (remove the [ANSWER:...] tag)
         const displayContent = response.content.replace(/\[ANSWER:\s*.*?\]/i, '').trim();
 
         setMessages(prev => prev.map(m =>
@@ -264,12 +256,11 @@ Be specific about what you read in the image. Format math clearly.`;
             : m
         ));
 
-        // If we extracted an answer and we're in practice mode, fill the answer box
         if (extractedAnswer && isInPracticeMode && onImageAnswerExtracted) {
           onImageAnswerExtracted(extractedAnswer);
         }
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Failed to get response';
+        const errorMsg = error instanceof Error ? error.message : 'Failed to retrieve response';
         setMessages(prev => prev.map(m =>
           m.id === loadingId
             ? { ...m, content: '', isLoading: false, error: errorMsg }
@@ -277,8 +268,7 @@ Be specific about what you read in the image. Format math clearly.`;
         ));
       }
     } else {
-      // Mock AI
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 600));
       const response = getMockResponse(currentInput, currentTopic);
       setMessages(prev => prev.map(m =>
         m.id === loadingId
@@ -292,136 +282,134 @@ Be specific about what you read in the image. Format math clearly.`;
 
   return (
     <>
-      {/* Chat Toggle Button */}
+      {/* Launcher Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded border border-slate-700 shadow-xl transition-all duration-200 hover:scale-105 flex items-center justify-center font-mono text-xs font-bold"
+        title="Open AI Math Assistant"
       >
-        {isOpen ? <FiX size={24} /> : (
-          <div className="relative">
-            <span className="text-2xl">🤖</span>
+        {isOpen ? <FiX size={20} /> : (
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🤖</span>
+            <span className="hidden sm:inline">AI Tutor</span>
             {isInPracticeMode && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-purple-600" />
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
             )}
           </div>
         )}
       </button>
 
-      {/* Chat Window */}
+      {/* Floating Panel */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[420px] max-w-[calc(100vw-3rem)] h-[560px] max-h-[calc(100vh-8rem)] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+        <div className="fixed bottom-20 right-6 z-50 w-[420px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-6rem)] bg-white rounded border border-slate-300 shadow-2xl flex flex-col overflow-hidden font-sans text-slate-900">
           {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl">
+          <div className="bg-slate-900 text-white p-3.5 flex items-center justify-between border-b border-slate-800 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-base shrink-0">
                 🤖
               </div>
               <div>
-                <h3 className="font-bold">Math Buddy AI</h3>
-                <p className="text-xs text-purple-200 flex items-center gap-1">
+                <h3 className="font-bold text-xs uppercase tracking-wider text-white">Math Buddy AI Tutor</h3>
+                <p className="text-[10px] font-mono text-slate-400 flex items-center gap-1 mt-0.5">
                   {isAIEnabled ? (
                     <>
-                      <span className="w-2 h-2 bg-green-400 rounded-full inline-block" />
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block" />
                       {PROVIDER_INFO[config.provider].name}
                     </>
                   ) : (
                     <>
-                      <span className="w-2 h-2 bg-yellow-400 rounded-full inline-block" />
-                      Mock mode
+                      <span className="w-1.5 h-1.5 bg-amber-400 rounded-full inline-block" />
+                      Offline Mode
                     </>
                   )}
                   {isInPracticeMode && (
-                    <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded text-[10px]">Practice</span>
+                    <span className="ml-1 bg-slate-800 text-emerald-400 border border-slate-700 px-1 py-0.2 rounded text-[9px] uppercase">Practice Active</span>
                   )}
                 </p>
               </div>
             </div>
+
             <div className="flex items-center gap-1">
               <button
                 onClick={onOpenReport}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                title="Weekly Report"
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
+                title="Weekly Progress Analytics"
               >
                 <FiBarChart2 size={16} />
               </button>
               <button
                 onClick={onOpenSettings}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
                 title="AI Settings"
               >
                 <FiSettings size={16} />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
                 title="Close chat"
               >
-                <FiX size={18} />
+                <FiX size={16} />
               </button>
             </div>
           </div>
 
-          {/* Context Banner */}
+          {/* Current Topic Sub-bar */}
           {(currentTopic || currentUnit) && (
-            <div className="px-4 py-2 bg-purple-50 border-b border-purple-100 text-xs text-purple-700">
-              <span className="font-medium">📍 Current context:</span>{' '}
-              {currentUnit && <span>{currentUnit} → </span>}
-              {currentTopic && <span className="font-medium">{currentTopic}</span>}
+            <div className="px-3.5 py-1.5 bg-slate-100 border-b border-slate-200 text-[11px] font-mono text-slate-700 shrink-0">
+              <span className="font-bold text-slate-900">Context:</span>{' '}
+              {currentUnit && <span>{currentUnit} / </span>}
+              {currentTopic && <span className="font-semibold text-emerald-800">{currentTopic}</span>}
             </div>
           )}
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {/* Messages Feed */}
+          <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-slate-50 text-xs">
             {messages.map(msg => (
               <div
                 key={msg.id}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl overflow-hidden ${
+                  className={`max-w-[88%] rounded p-3 border font-sans text-xs ${
                     msg.role === 'user'
-                      ? 'bg-indigo-600 text-white rounded-br-md'
-                      : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                      ? 'bg-slate-900 text-white border-slate-800'
+                      : 'bg-white text-slate-900 border-slate-200 shadow-xs'
                   }`}
                 >
                   {msg.imageData && (
-                    <div className="p-2">
+                    <div className="mb-2">
                       <img
                         src={msg.imageData}
-                        alt="Attached"
-                        className="max-h-40 rounded-xl object-contain bg-white"
+                        alt="Attached work"
+                        className="max-h-36 rounded border border-slate-300 object-contain bg-slate-100"
                       />
                     </div>
                   )}
-                  <div className="p-3">
+                  <div>
                     {msg.isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
-                        <span className="text-xs text-gray-500">Thinking...</span>
+                      <div className="flex items-center gap-2 font-mono text-slate-500">
+                        <span className="animate-pulse font-bold text-emerald-700">Evaluating work...</span>
                       </div>
                     ) : msg.error ? (
                       <div className="flex items-start gap-2">
-                        <FiAlertCircle className="text-red-500 mt-0.5 flex-shrink-0" size={16} />
+                        <FiAlertCircle className="text-red-600 shrink-0 mt-0.5" size={14} />
                         <div>
-                          <p className="text-red-600 text-sm font-medium">Error</p>
-                          <p className="text-red-500 text-xs">{msg.error}</p>
-                          <button onClick={onOpenSettings} className="text-xs text-purple-600 underline mt-1">
-                            Check settings
+                          <p className="text-red-950 font-bold">API Connection Failure</p>
+                          <p className="text-red-800 text-[11px] font-mono mt-0.5">{msg.error}</p>
+                          <button onClick={onOpenSettings} className="text-[11px] text-emerald-800 font-mono font-bold underline mt-1 block">
+                            Configure API key in settings →
                           </button>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                        <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                         {msg.extractedAnswer && isInPracticeMode && (
-                          <div className="mt-2 bg-green-100 border border-green-300 rounded-lg p-2 text-xs text-green-800">
-                            ✅ Answer extracted: <strong>{msg.extractedAnswer}</strong>
+                          <div className="mt-2 bg-emerald-50 border border-emerald-300 rounded p-2 text-[11px] font-mono text-emerald-950">
+                            ✓ Extracted Answer: <strong>{msg.extractedAnswer}</strong>
                             <br />
-                            <span className="text-green-600">→ Filled in the answer box above!</span>
+                            <span className="text-emerald-800">Auto-filled in input field!</span>
                           </div>
                         )}
                       </>
@@ -433,50 +421,48 @@ Be specific about what you read in the image. Format math clearly.`;
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Image Preview */}
+          {/* Image Attachment Preview */}
           {attachedImage && (
-            <div className="px-3 pb-2">
+            <div className="px-3.5 py-2 bg-white border-t border-slate-200 shrink-0">
               <div className="relative inline-block">
-                <img src={attachedImage} alt="To send" className="h-20 rounded-lg border-2 border-purple-300 object-contain" />
+                <img src={attachedImage} alt="Attachment" className="h-16 rounded border border-slate-300 object-contain" />
                 <button
                   onClick={() => setAttachedImage(null)}
-                  className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-600 text-white rounded flex items-center justify-center text-[10px] font-bold"
                 >
                   ×
                 </button>
               </div>
-              {isInPracticeMode && (
-                <p className="text-xs text-purple-600 mt-1">📸 AI will read this and fill your answer box!</p>
-              )}
             </div>
           )}
 
-          {/* Input Area */}
-          <div className="p-3 border-t border-gray-200">
+          {/* Input Controls */}
+          <div className="p-3 bg-white border-t border-slate-200 shrink-0 space-y-2">
             {!isAIEnabled && (
-              <div className="mb-2 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                <FiZap className="text-amber-500 flex-shrink-0" size={14} />
-                <p className="text-xs text-amber-700">
-                  Connect a real AI for smart responses & image reading.
-                  <button onClick={onOpenSettings} className="underline font-medium ml-1">Set up</button>
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-300 rounded px-2.5 py-1.5 text-[11px]">
+                <FiZap className="text-amber-700 shrink-0" size={12} />
+                <p className="text-amber-950 font-mono">
+                  Offline mode active. <button onClick={onOpenSettings} className="underline font-bold text-emerald-800">Add API key</button> to read photos & full tutoring.
                 </p>
               </div>
             )}
-            <div className="flex gap-2 items-end">
-              <div className="flex gap-1">
+            <div className="flex items-center gap-1.5">
+              <div className="flex gap-1 shrink-0">
                 <button
+                  type="button"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                  title="Take photo"
+                  className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
+                  title="Capture photo of work"
                 >
-                  <FiCamera size={18} />
+                  <FiCamera size={16} />
                 </button>
                 <button
+                  type="button"
                   onClick={() => imageInputRef.current?.click()}
-                  className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                  title="Upload image"
+                  className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
+                  title="Attach photo"
                 >
-                  <FiImage size={18} />
+                  <FiImage size={16} />
                 </button>
               </div>
               <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleImageAttach} className="hidden" />
@@ -487,15 +473,16 @@ Be specific about what you read in the image. Format math clearly.`;
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                placeholder={isInPracticeMode ? "Ask or snap your answer..." : "Ask anything..."}
-                className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                placeholder={isInPracticeMode ? "Ask or snap your answer..." : "Ask math questions..."}
+                className="flex-1 px-3 py-2 bg-slate-50 border border-slate-300 rounded text-xs focus:outline-none focus:border-slate-900 text-slate-900"
               />
               <button
+                type="button"
                 onClick={handleSend}
                 disabled={isLoading || (!input.trim() && !attachedImage)}
-                className="bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
               >
-                <FiSend size={18} />
+                <FiSend size={16} />
               </button>
             </div>
           </div>

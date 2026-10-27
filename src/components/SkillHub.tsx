@@ -1,9 +1,12 @@
-import { FiArrowLeft, FiBookOpen, FiEdit3, FiCheck, FiLock } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { FiArrowLeft, FiBookOpen, FiEdit3, FiCheck, FiLock, FiZap } from 'react-icons/fi';
 import { Skill } from '../data/curriculum';
+import { jungleFruits, jungleZoneLogs } from '../data/jungleLore';
 
 interface SkillHubProps {
   skill: Skill;
   unitTitle: string;
+  unitId?: string;
   lessonsCompleted: string[];
   practiceCompleted: string[];
   masteryLevel: number;
@@ -12,9 +15,33 @@ interface SkillHubProps {
   onBack: () => void;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.02,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.22,
+      ease: [0.25, 0.1, 0.25, 1],
+    },
+  },
+};
+
 export default function SkillHub({
   skill,
   unitTitle,
+  unitId = 'unit-1',
   lessonsCompleted,
   practiceCompleted,
   masteryLevel,
@@ -25,168 +52,225 @@ export default function SkillHub({
   const allLessonsCompleted = skill.lessons.every(l => lessonsCompleted.includes(l.id));
   const allPracticeCompleted = skill.practice.every(p => practiceCompleted.includes(p.id));
 
+  // Determine fruit for current zone
+  const currentFruit = jungleFruits[unitId];
+  const currentLog = jungleZoneLogs[unitId];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans pb-16">
+      {/* Expedition Trailhead Banner */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-amber-950 text-slate-100 border-b border-amber-900/40 sticky top-12 z-20 shadow-xs">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-2"
+            className="flex items-center gap-1.5 text-xs font-mono font-medium text-amber-300 hover:text-white transition-colors mb-2"
           >
-            <FiArrowLeft /> Back to Tree
+            <FiArrowLeft size={14} /> Back to Expedition Map
           </button>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-300 bg-amber-950/80 border border-amber-600/40 px-2 py-0.5 rounded">
               {unitTitle}
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mt-1">{skill.title}</h1>
-          <p className="text-gray-500 text-sm mt-1">{skill.description}</p>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white">{skill.title}</h1>
+          <p className="text-slate-300 text-xs mt-1 max-w-2xl">{skill.description}</p>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* Mastery Progress */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-gray-800">Mastery Level</h3>
-            <span className="text-2xl font-bold text-purple-600">{masteryLevel}%</span>
+      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Lore Field Log */}
+        {currentLog && (
+          <div className="bg-stone-100 border border-stone-300 p-4 rounded text-xs text-stone-800 font-serif italic flex items-start gap-3">
+            <span className="text-2xl shrink-0">📜</span>
+            <div>
+              <p className="font-bold text-stone-900 not-italic font-sans mb-0.5">Explorer's Field Journal</p>
+              <p>{currentLog.journalEntry}</p>
+            </div>
           </div>
-          <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+        )}
+
+        {/* Module Mastery & Fruit Reward Banner */}
+        <div className="bg-white rounded border border-stone-300 p-5 shadow-xs">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-stone-600">Trail Mastery</h3>
+              <p className="text-xs text-stone-500 mt-0.5">Complete lessons and problem sets to harvest Knowledge Fruits</p>
+            </div>
+            <span className="text-2xl font-bold font-mono text-emerald-800">{masteryLevel}%</span>
+          </div>
+          <div className="h-2 bg-stone-100 rounded overflow-hidden border border-stone-200">
             <div
-              className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-700"
+              className="h-full bg-emerald-600 transition-all duration-500"
               style={{ width: `${masteryLevel}%` }}
             />
           </div>
-          <div className="flex justify-between mt-3 text-xs text-gray-500">
-            <span>Lessons: {lessonsCompleted.length}/{skill.lessons.length}</span>
-            <span>Practice: {practiceCompleted.length}/{skill.practice.length}</span>
-          </div>
+
+          {currentFruit && (
+            <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between bg-amber-50/60 p-3 rounded border border-amber-200 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{currentFruit.icon}</span>
+                <div>
+                  <p className="font-bold text-amber-950 font-mono">{currentFruit.name}</p>
+                  <p className="text-[11px] text-stone-600">{currentFruit.description}</p>
+                </div>
+              </div>
+              <span className="font-mono font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-1 rounded shrink-0 flex items-center gap-1">
+                <FiZap size={12} /> +{currentFruit.staminaBoost} Stamina
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Lessons Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <FiBookOpen className="text-blue-600" size={20} />
+        {/* Lessons Section with Framer Motion Staggered Trail Markers */}
+        <div className="bg-white rounded border border-stone-300 p-5 shadow-xs">
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-stone-100 rounded border border-stone-300 flex items-center justify-center text-slate-800">
+                <FiBookOpen size={16} />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-wide text-stone-900">Trail Lessons</h2>
+                <p className="text-xs text-stone-500">Step-by-step conceptual walkthroughs</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-800">Lessons</h2>
-              <p className="text-sm text-gray-500">Learn the concepts step by step</p>
-            </div>
+            <span className="text-xs font-mono font-bold bg-stone-100 text-stone-700 px-2.5 py-1 rounded border border-stone-200">
+              {lessonsCompleted.length} of {skill.lessons.length} Completed
+            </span>
           </div>
 
-          <div className="space-y-3">
+          <motion.div
+            className="space-y-2.5"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+          >
             {skill.lessons.map((lesson, index) => {
               const completed = lessonsCompleted.includes(lesson.id);
               const prevCompleted = index === 0 || lessonsCompleted.includes(skill.lessons[index - 1].id);
               const isAccessible = prevCompleted;
 
               return (
-                <button
+                <motion.button
                   key={lesson.id}
+                  variants={itemVariants}
                   onClick={() => isAccessible && onSelectLesson(lesson.id)}
                   disabled={!isAccessible}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                  className={`w-full text-left p-3.5 rounded border text-sm transition-all flex items-center justify-between ${
                     completed
-                      ? 'border-green-300 bg-green-50 hover:bg-green-100'
+                      ? 'border-emerald-300 bg-emerald-50/60 hover:bg-emerald-100/60'
                       : isAccessible
-                      ? 'border-blue-200 bg-white hover:border-blue-400 hover:shadow-md'
-                      : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                      ? 'border-stone-300 bg-white hover:border-emerald-600 hover:shadow-xs'
+                      : 'border-stone-200 bg-stone-50 opacity-60 cursor-not-allowed'
                   }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded border flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
                       completed
-                        ? 'bg-green-500'
+                        ? 'bg-emerald-700 border-emerald-800 text-white'
                         : isAccessible
-                        ? 'bg-blue-500'
-                        : 'bg-gray-300'
+                        ? 'bg-slate-900 border-slate-900 text-white'
+                        : 'bg-stone-200 border-stone-300 text-stone-500'
                     }`}>
                       {completed ? (
-                        <FiCheck className="text-white" size={18} />
+                        <FiCheck size={16} />
                       ) : isAccessible ? (
-                        <FiBookOpen className="text-white" size={18} />
+                        <span>{index + 1}</span>
                       ) : (
-                        <FiLock className="text-white" size={16} />
+                        <FiLock size={14} />
                       )}
                     </div>
-                    <div className="flex-1">
-                      <h3 className={`font-bold ${completed ? 'text-green-700' : isAccessible ? 'text-gray-800' : 'text-gray-400'}`}>
+                    <div>
+                      <h3 className={`font-semibold text-sm ${completed ? 'text-emerald-950' : isAccessible ? 'text-stone-900' : 'text-stone-400'}`}>
                         {lesson.title}
                       </h3>
-                      <p className={`text-sm ${completed ? 'text-green-600' : isAccessible ? 'text-gray-500' : 'text-gray-400'}`}>
-                        {completed ? '✓ Completed' : isAccessible ? 'Ready to learn' : 'Complete previous lesson first'}
+                      <p className={`text-xs ${completed ? 'text-emerald-800' : isAccessible ? 'text-stone-600' : 'text-stone-400'}`}>
+                        {lesson.keyConcept || lesson.explanation.slice(0, 75) + '...'}
                       </p>
                     </div>
                   </div>
-                </button>
+
+                  <span className={`text-xs font-mono font-medium px-2.5 py-1 rounded border shrink-0 ${
+                    completed
+                      ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                      : isAccessible
+                      ? 'bg-stone-100 text-stone-800 border-stone-300'
+                      : 'bg-stone-100 text-stone-400 border-stone-200'
+                  }`}>
+                    {completed ? 'Completed ✓' : isAccessible ? 'Study Lesson →' : 'Locked'}
+                  </span>
+                </motion.button>
               );
             })}
-          </div>
+          </motion.div>
         </div>
 
-        {/* Practice Section */}
-        <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-              <FiEdit3 className="text-green-600" size={20} />
+        {/* Practice Exercises Section */}
+        <div className="bg-white rounded border border-stone-300 p-5 shadow-xs">
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-stone-100 rounded border border-stone-300 flex items-center justify-center text-slate-800">
+                <FiEdit3 size={16} />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-wide text-stone-900">Jungle Practice Trial</h2>
+                <p className="text-xs text-stone-500">Test understanding and harvest regional Knowledge Fruits</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-800">Practice</h2>
-              <p className="text-sm text-gray-500">Test your understanding</p>
-            </div>
+            <span className="text-xs font-mono font-bold bg-stone-100 text-stone-700 px-2.5 py-1 rounded border border-stone-200">
+              {skill.practice.length} Questions
+            </span>
           </div>
 
           <button
             onClick={onStartPractice}
             disabled={!allLessonsCompleted}
-            className={`w-full p-6 rounded-2xl border-2 transition-all ${
+            className={`w-full p-4 rounded border text-left transition-all ${
               allLessonsCompleted
-                ? 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 hover:shadow-lg hover:border-green-400 cursor-pointer'
-                : 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                ? 'border-emerald-600 bg-emerald-50/80 hover:bg-emerald-100/80 cursor-pointer shadow-xs'
+                : 'border-stone-200 bg-stone-50 cursor-not-allowed opacity-60'
             }`}
           >
-            <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center ${
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded border flex items-center justify-center ${
+                  allLessonsCompleted
+                    ? 'bg-emerald-700 border-emerald-800 text-white'
+                    : 'bg-stone-200 border-stone-300 text-stone-500'
+                }`}>
+                  {allPracticeCompleted ? (
+                    <FiCheck size={18} />
+                  ) : allLessonsCompleted ? (
+                    <FiEdit3 size={18} />
+                  ) : (
+                    <FiLock size={16} />
+                  )}
+                </div>
+                <div>
+                  <h3 className={`font-bold text-sm ${allLessonsCompleted ? 'text-emerald-950' : 'text-stone-400'}`}>
+                    {allPracticeCompleted
+                      ? 'Practice Trial Complete'
+                      : allLessonsCompleted
+                      ? 'Launch Practice Trial'
+                      : 'Complete Lessons Above First'}
+                  </h3>
+                  <p className={`text-xs ${allLessonsCompleted ? 'text-emerald-800' : 'text-stone-400'}`}>
+                    {allPracticeCompleted
+                      ? `All ${skill.practice.length} practice problems completed.`
+                      : allLessonsCompleted
+                      ? `${skill.practice.length} questions available to harvest Knowledge Fruit.`
+                      : 'Finish chapter lessons above to unlock practice trial.'}
+                  </p>
+                </div>
+              </div>
+
+              <span className={`text-xs font-mono font-semibold px-3 py-1.5 rounded border ${
                 allLessonsCompleted
-                  ? 'bg-gradient-to-br from-green-400 to-emerald-500'
-                  : 'bg-gray-300'
+                  ? 'bg-emerald-700 text-white border-emerald-800 shadow-xs'
+                  : 'bg-stone-200 text-stone-500 border-stone-300'
               }`}>
-                {allPracticeCompleted ? (
-                  <FiCheck className="text-white" size={24} />
-                ) : allLessonsCompleted ? (
-                  <FiEdit3 className="text-white" size={24} />
-                ) : (
-                  <FiLock className="text-white" size={20} />
-                )}
-              </div>
-              <div className="text-left">
-                <h3 className={`font-bold text-lg ${allLessonsCompleted ? 'text-green-700' : 'text-gray-400'}`}>
-                  {allPracticeCompleted
-                    ? 'Practice Complete! ✨'
-                    : allLessonsCompleted
-                    ? 'Start Practice'
-                    : 'Complete All Lessons First'}
-                </h3>
-                <p className={`text-sm ${allLessonsCompleted ? 'text-green-600' : 'text-gray-400'}`}>
-                  {allPracticeCompleted
-                    ? `All ${skill.practice.length} questions answered correctly`
-                    : allLessonsCompleted
-                    ? `${skill.practice.length} questions to test your knowledge`
-                    : 'Finish the lessons above to unlock practice'}
-                </p>
-              </div>
+                {allPracticeCompleted ? 'Review Trial' : allLessonsCompleted ? 'Start →' : 'Locked'}
+              </span>
             </div>
-            {allLessonsCompleted && !allPracticeCompleted && (
-              <div className="mt-4 h-2 bg-green-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
-                  style={{ width: `${(practiceCompleted.length / skill.practice.length) * 100}%` }}
-                />
-              </div>
-            )}
           </button>
         </div>
       </div>
