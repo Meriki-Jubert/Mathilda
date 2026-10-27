@@ -275,13 +275,22 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
                 </p>
               </div>
             </div>
-            <button
-              onClick={onOpenSettings}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              title="AI Settings"
-            >
-              <FiSettings size={18} />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={onOpenSettings}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                title="AI Settings"
+              >
+                <FiSettings size={18} />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                title="Close chat"
+              >
+                <FiX size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
