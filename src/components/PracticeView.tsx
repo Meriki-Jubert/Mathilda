@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiArrowLeft, FiCheck, FiX, FiHelpCircle, FiArrowRight, FiMessageCircle } from 'react-icons/fi';
 import { PracticeQuestion } from '../data/curriculum';
 
 interface PracticeViewProps {
   questions: PracticeQuestion[];
   skillId: string;
-  onComplete: (questionId: string) => void;
+  onComplete: (questionId: string, isCorrect: boolean, userAnswer: string, hintUsed: boolean) => void;
   onBack: () => void;
   completedQuestions: string[];
+  injectedAnswer?: string | null;
+  onAnswerConsumed?: () => void;
 }
 
-export default function PracticeView({ questions, onComplete, onBack, completedQuestions }: PracticeViewProps) {
+export default function PracticeView({
+  questions,
+  onComplete,
+  onBack,
+  completedQuestions,
+  injectedAnswer,
+  onAnswerConsumed,
+}: PracticeViewProps) {
   const [currentQ, setCurrentQ] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -18,9 +27,20 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
   const [isCorrect, setIsCorrect] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [showAnswerFlash, setShowAnswerFlash] = useState(false);
 
   const question = questions[currentQ];
   const isAlreadyCompleted = completedQuestions.includes(question.id);
+
+  // Handle AI-injected answer
+  useEffect(() => {
+    if (injectedAnswer && question.type === 'text' && !showResult) {
+      setUserAnswer(injectedAnswer);
+      setShowAnswerFlash(true);
+      setTimeout(() => setShowAnswerFlash(false), 2000);
+      onAnswerConsumed?.();
+    }
+  }, [injectedAnswer]);
 
   const normalizeAnswer = (answer: string) => {
     return answer
@@ -61,9 +81,8 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
     setShowResult(true);
     setShowExplanation(true);
 
-    if (correct) {
-      onComplete(question.id);
-    }
+    // Log the answer with analytics
+    onComplete(question.id, correct, answer, showHint);
   };
 
   const nextQuestion = () => {
@@ -95,7 +114,6 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
             {currentQ + 1}/{questions.length}
           </span>
         </div>
-        {/* Progress bar */}
         <div className="h-1 bg-gray-100">
           <div
             className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500"
@@ -107,7 +125,9 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
       {/* Content */}
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Question Card */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div className={`bg-white rounded-2xl p-6 shadow-sm border-2 transition-all duration-500 mb-6 ${
+          showAnswerFlash ? 'border-purple-400 shadow-purple-100 shadow-lg' : 'border-gray-100'
+        }`}>
           <div className="flex items-center gap-2 mb-4">
             <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
               Question {currentQ + 1}
@@ -115,6 +135,11 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
             {isAlreadyCompleted && (
               <span className="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">
                 ✓ Previously correct
+              </span>
+            )}
+            {showAnswerFlash && (
+              <span className="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-medium animate-pulse">
+                🤖 AI filled answer
               </span>
             )}
           </div>
@@ -176,16 +201,24 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
                 disabled={showResult}
                 placeholder="Type your answer here..."
                 className={`w-full p-4 rounded-xl border-2 text-lg focus:outline-none transition-all ${
-                  showResult
+                  showAnswerFlash
+                    ? 'border-purple-400 bg-purple-50 ring-2 ring-purple-200'
+                    : showResult
                     ? isCorrect
                       ? 'border-green-500 bg-green-50'
                       : 'border-red-500 bg-red-50'
                     : 'border-gray-200 focus:border-purple-400'
                 }`}
               />
-              <p className="text-xs text-gray-400">
-                💡 Tip: You can also snap a photo of your handwritten answer and send it to the AI tutor (🤖 button bottom-right)
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-400">
+                  💡 Snap a photo of your work → send to AI tutor (🤖) → answer auto-fills here!
+                </p>
+                <div className="flex items-center gap-1 text-xs text-purple-500">
+                  <FiMessageCircle size={12} />
+                  <span>AI ready</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -244,7 +277,7 @@ export default function PracticeView({ questions, onComplete, onBack, completedQ
             {!isCorrect && (
               <p className="text-blue-600 text-xs mt-2 flex items-center gap-1">
                 <FiMessageCircle size={12} />
-                Ask the AI tutor for a deeper explanation of this concept!
+                Ask the AI tutor for a deeper explanation! It knows what you got wrong.
               </p>
             )}
           </div>

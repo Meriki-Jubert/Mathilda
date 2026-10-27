@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FiMessageCircle, FiX, FiSend, FiSettings, FiCamera, FiImage, FiAlertCircle, FiZap } from 'react-icons/fi';
+import { FiX, FiSend, FiSettings, FiCamera, FiImage, FiAlertCircle, FiZap, FiBarChart2 } from 'react-icons/fi';
 import { AIConfig, PROVIDER_INFO } from '../services/aiModels';
 import { callAI, createImageMessage } from '../services/aiService';
 
@@ -11,72 +11,77 @@ interface Message {
   timestamp: Date;
   isLoading?: boolean;
   error?: string;
+  extractedAnswer?: string;
 }
 
 interface AIChatbotProps {
   currentTopic: string;
   currentUnit: string;
+  currentSkillId?: string;
+  currentQuestion?: string;
   config: AIConfig;
   isAIEnabled: boolean;
+  aiContext: string;
   onOpenSettings: () => void;
+  onOpenReport: () => void;
+  onImageAnswerExtracted?: (answer: string) => void;
+  onChatLogged?: (message: string, hadImage: boolean) => void;
+  isInPracticeMode: boolean;
 }
 
-// Mock AI responses for when no real API is configured
 const MOCK_RESPONSES: Record<string, string[]> = {
   'negative-numbers': [
-    "Great question! Think of negative numbers like debt. If you owe $5, that's -5. When you square a debt (multiply it by itself), two negatives cancel out — like saying 'I don't not owe you' = you DO owe. So (-5)² = 25.",
-    "Remember: parentheses are like a box. (-3)² means everything in the box gets squared. -3² means only 3 gets squared, then we make it negative. The box makes all the difference!",
+    "Think of negative numbers like debt. If you owe $5, that's -5. When you square a debt, two negatives cancel out. So (-5)² = 25.",
+    "Parentheses are like a box. (-3)² means everything in the box gets squared. -3² means only 3 gets squared, then negated.",
   ],
   'fractions': [
-    "Fractions are just division in disguise! 3/4 means '3 divided by 4'. When adding fractions, think of it like money — you need the same 'denomination' (common denominator) before you can add them.",
-    "The LCD (Lowest Common Denominator) is like finding the smallest pizza size that lets you cut both fractions into equal slices. For 1/3 and 1/4, that's 12 slices.",
+    "Fractions are just division in disguise! When adding fractions, you need the same 'denomination' (common denominator).",
+    "The LCD is like finding the smallest pizza size that lets you cut both fractions into equal slices.",
   ],
   'functions': [
-    "Think of f(x) as a recipe. f(x) = 2x + 1 means 'take your number, double it, add 1.' f(3) means 'follow the recipe with 3': 2(3) + 1 = 7. That's all substitution is!",
-    "Domain is like a bouncer at a club — some numbers aren't allowed in! Division by zero? Not allowed. Square root of negative? Not allowed.",
+    "Think of f(x) as a recipe. f(x) = 2x + 1 means 'take your number, double it, add 1.' f(3) = 7!",
+    "Domain is like a bouncer at a club — some numbers aren't allowed in!",
   ],
   'limits': [
-    "A limit is like watching a car approach a stop sign. We don't care if it actually stops — we care about where it's HEADING. That destination is the limit.",
-    "When you get 0/0, don't panic! It's not 'undefined' — it's 'try harder.' Factor, cancel the common piece, then try plugging in again.",
+    "A limit is like watching a car approach a stop sign. We care about where it's HEADING.",
+    "When you get 0/0, don't panic! Factor, cancel, then try again.",
   ],
   'probability': [
-    "Probability is just counting! How many 'good' outcomes divided by total outcomes. If 3 out of 10 marbles are red, P(red) = 3/10. That's it!",
-    "AND means multiply (both must happen). OR means add (either can happen). But for OR, subtract the overlap so you don't double-count!",
+    "Probability is just counting! Good outcomes / total outcomes.",
+    "AND = multiply. OR = add (subtract overlap).",
   ],
   'statistics': [
-    "Mean = fair share (if everyone pooled and split equally). Median = the middle person. Mode = the most popular. Each tells a different story!",
-    "Standard deviation measures consistency. Low SD = everyone scored similarly. High SD = huge variation.",
+    "Mean = fair share. Median = middle person. Mode = most popular.",
+    "Standard deviation measures consistency.",
   ],
   'calculus': [
-    "The power rule is your best friend: bring the exponent down, reduce by 1. x⁵ → 5x⁴. That's it! Practice until it's automatic.",
-    "Integration is UNDOING differentiation. Power rule backwards: add 1 to power, divide by new power. x³ → x⁴/4. Don't forget +C!",
+    "Power rule: bring the exponent down, reduce by 1. x⁵ → 5x⁴.",
+    "Integration is UNDOING differentiation. Add 1 to power, divide by new power.",
   ],
   'vectors': [
-    "Vectors are arrows with length and direction. The dot product tells you how 'aligned' two arrows are. Same direction = big positive. Perpendicular = zero.",
-    "For magnitude: it's just Pythagoras in 3D! |v| = √(x² + y² + z²). Like finding the diagonal of a box.",
+    "Vectors are arrows with length and direction. Dot product = how aligned they are.",
+    "Magnitude: Pythagoras in 3D! |v| = √(x² + y² + z²).",
   ],
   'laplace': [
-    "Laplace transforms are a translation tool. You translate a hard differential equation into easy algebra, solve it, then translate back!",
-    "Memorize these 3: L{1} = 1/s, L{t} = 1/s², L{eᵃᵗ} = 1/(s-a). These three solve 80% of exam questions!",
+    "Laplace transforms translate hard DEs into easy algebra!",
+    "Memorize: L{1} = 1/s, L{t} = 1/s², L{eᵃᵗ} = 1/(s-a).",
   ],
   'default': [
-    "I'm here to help you understand math! Connect a real AI model in Settings for personalized, intelligent responses. For now, I can give you general tips! 📚",
-    "💡 Tip: Connect an AI model in Settings (⚙️) to get personalized help with your specific questions. Free options are available through HuggingFace and OpenRouter!",
-    "Math is just patterns and recipes. Every formula has a story behind it. Connect a real AI in Settings for detailed explanations! 🎯",
+    "I'm here to help! Connect a real AI in Settings for personalized responses. 📚",
+    "💡 Connect an AI model in Settings (⚙️) for smart help with your specific questions!",
   ],
 };
 
 function getMockResponse(message: string, currentTopic: string): string {
   const lowerMsg = message.toLowerCase();
   let topicKey = 'default';
-
   if (lowerMsg.includes('negative') || lowerMsg.includes('(-')) topicKey = 'negative-numbers';
   else if (lowerMsg.includes('fraction') || lowerMsg.includes('denominator')) topicKey = 'fractions';
   else if (lowerMsg.includes('function') || lowerMsg.includes('domain')) topicKey = 'functions';
   else if (lowerMsg.includes('limit') || lowerMsg.includes('approach')) topicKey = 'limits';
   else if (lowerMsg.includes('probability') || lowerMsg.includes('chance')) topicKey = 'probability';
-  else if (lowerMsg.includes('mean') || lowerMsg.includes('median') || lowerMsg.includes('standard deviation')) topicKey = 'statistics';
-  else if (lowerMsg.includes('derivative') || lowerMsg.includes('integral') || lowerMsg.includes('power rule')) topicKey = 'calculus';
+  else if (lowerMsg.includes('mean') || lowerMsg.includes('median')) topicKey = 'statistics';
+  else if (lowerMsg.includes('derivative') || lowerMsg.includes('integral')) topicKey = 'calculus';
   else if (lowerMsg.includes('vector') || lowerMsg.includes('dot product')) topicKey = 'vectors';
   else if (lowerMsg.includes('laplace') || lowerMsg.includes('transform')) topicKey = 'laplace';
 
@@ -87,24 +92,36 @@ function getMockResponse(message: string, currentTopic: string): string {
     else if (currentTopic.includes('Limit') || currentTopic.includes('Continuity')) topicKey = 'limits';
     else if (currentTopic.includes('Probability') || currentTopic.includes('Chance')) topicKey = 'probability';
     else if (currentTopic.includes('Data') || currentTopic.includes('Statistics')) topicKey = 'statistics';
-    else if (currentTopic.includes('Calculus') || currentTopic.includes('Derivative') || currentTopic.includes('Integration')) topicKey = 'calculus';
+    else if (currentTopic.includes('Calculus') || currentTopic.includes('Derivative')) topicKey = 'calculus';
     else if (currentTopic.includes('Vector') || currentTopic.includes('Engineering')) topicKey = 'vectors';
     else if (currentTopic.includes('Laplace')) topicKey = 'laplace';
   }
-
   const responses = MOCK_RESPONSES[topicKey] || MOCK_RESPONSES['default'];
   return responses[Math.floor(Math.random() * responses.length)];
 }
 
-export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabled, onOpenSettings }: AIChatbotProps) {
+export default function AIChatbot({
+  currentTopic,
+  currentUnit,
+  currentSkillId,
+  currentQuestion,
+  config,
+  isAIEnabled,
+  aiContext,
+  onOpenSettings,
+  onOpenReport,
+  onImageAnswerExtracted,
+  onChatLogged,
+  isInPracticeMode,
+}: AIChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
       content: isAIEnabled
-        ? `Hi! 👋 I'm your Math Buddy AI, powered by ${PROVIDER_INFO[config.provider].name}. I can read images of your math work too! What would you like help with?`
-        : `Hi! 👋 I'm your Math Buddy. Connect a real AI model in Settings (⚙️) for personalized help! I support vision models that can read your handwritten math. What topic are you working on?`,
+        ? `Hi! 👋 I'm your Math Buddy AI, powered by ${PROVIDER_INFO[config.provider].name}. I can read images of your work and help fill in answers! What do you need?`
+        : `Hi! 👋 I'm your Math Buddy. Connect a real AI in Settings (⚙️) for smart help & image reading! What topic are you working on?`,
       timestamp: new Date(),
     },
   ]);
@@ -119,25 +136,9 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Update welcome message when AI config changes
-  useEffect(() => {
-    if (isAIEnabled) {
-      setMessages(prev => [
-        prev[0],
-        {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: `🤖 Real AI connected! I'm now powered by **${PROVIDER_INFO[config.provider].name}** (${config.modelId}). I can understand images of your math work — just snap a photo or upload an image!`,
-          timestamp: new Date(),
-        },
-      ]);
-    }
-  }, [isAIEnabled]);
-
   const handleImageAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (max 4MB for most APIs)
       if (file.size > 4 * 1024 * 1024) {
         alert('Image too large! Please use an image under 4MB.');
         return;
@@ -148,8 +149,13 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
       };
       reader.readAsDataURL(file);
     }
-    // Reset input so same file can be selected again
     e.target.value = '';
+  };
+
+  // Extract answer from AI response (looks for [ANSWER:...] pattern)
+  const extractAnswerFromResponse = (response: string): string | null => {
+    const match = response.match(/\[ANSWER:\s*(.*?)\]/i);
+    return match ? match[1].trim() : null;
   };
 
   const handleSend = async () => {
@@ -171,7 +177,9 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
     setAttachedImage(null);
     setIsLoading(true);
 
-    // Add loading message
+    // Log the chat
+    onChatLogged?.(currentInput || '(image)', !!currentImage);
+
     const loadingId = (Date.now() + 1).toString();
     setMessages(prev => [...prev, {
       id: loadingId,
@@ -182,41 +190,84 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
     }]);
 
     if (isAIEnabled) {
-      // Real AI call
       try {
-        // Build message content
         let content: string | ReturnType<typeof createImageMessage>;
         
         if (currentImage) {
-          const textPart = currentInput
-            ? `Student's question: "${currentInput}"\n\nThey also attached this image of their math work. Please analyze it and help them:\n- Read what's written in the image\n- Check if the work is correct\n- Point out any errors with explanations\n- Suggest corrections using everyday examples`
-            : `The student sent this image of their math work. Please:\n- Read what's written in the image\n- Check if the work is correct\n- Point out any errors with clear explanations\n- Use everyday examples to explain concepts\n- Be encouraging and patient`;
-          content = createImageMessage(textPart, currentImage);
+          let promptText = '';
+          
+          if (isInPracticeMode && currentQuestion) {
+            // Practice mode: extract answer from image
+            promptText = `The student is working on this question: "${currentQuestion}"
+
+They sent an image of their handwritten work/answer. Please:
+1. Carefully read what is written in the image
+2. Extract the final answer they arrived at
+3. Check if their work and answer are correct
+4. If correct, respond with: [ANSWER: the_extracted_answer] followed by encouragement
+5. If incorrect, explain what went wrong and provide the correct answer as: [ANSWER: correct_answer]
+
+Be specific about what you read in the image. Format math clearly.`;
+          } else {
+            promptText = `The student sent an image of their math work. Please:
+- Read what's written in the image carefully
+- Check if the work is correct
+- Point out any errors with clear explanations
+- Use everyday examples to explain concepts
+- Be encouraging and patient`;
+            if (currentInput) {
+              promptText += `\n\nThe student also says: "${currentInput}"`;
+            }
+          }
+          content = createImageMessage(promptText, currentImage);
         } else {
           content = currentInput;
         }
 
-        // Build conversation history (last 10 messages for context)
+        // Build conversation history with context
         const history = messages
           .filter(m => !m.isLoading && !m.error)
           .slice(-10)
           .map(m => ({
             role: m.role as 'user' | 'assistant',
-            content: m.imageData
-              ? createImageMessage(m.content, m.imageData)
+            content: m.role === 'assistant' && m.extractedAnswer
+              ? m.content + `\n\n[Extracted answer for student: ${m.extractedAnswer}]`
               : m.content,
           }));
 
+        // Prepend AI context about the student
+        const contextMessage = {
+          role: 'user' as const,
+          content: `[System: This is context about the student - do NOT respond to this, just use it for future responses]${aiContext}`,
+        };
+
         const response = await callAI(config, [
+          contextMessage,
           ...history,
           { role: 'user' as const, content },
         ]);
 
+        // Check if response contains an extracted answer
+        const extractedAnswer = extractAnswerFromResponse(response.content);
+        // Clean the displayed content (remove the [ANSWER:...] tag)
+        const displayContent = response.content.replace(/\[ANSWER:\s*.*?\]/i, '').trim();
+
         setMessages(prev => prev.map(m =>
           m.id === loadingId
-            ? { ...m, content: response.content, isLoading: false, error: response.error }
+            ? {
+                ...m,
+                content: displayContent || response.content,
+                isLoading: false,
+                error: response.error,
+                extractedAnswer: extractedAnswer || undefined,
+              }
             : m
         ));
+
+        // If we extracted an answer and we're in practice mode, fill the answer box
+        if (extractedAnswer && isInPracticeMode && onImageAnswerExtracted) {
+          onImageAnswerExtracted(extractedAnswer);
+        }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Failed to get response';
         setMessages(prev => prev.map(m =>
@@ -226,7 +277,7 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
         ));
       }
     } else {
-      // Mock AI response
+      // Mock AI
       await new Promise(resolve => setTimeout(resolve, 800));
       const response = getMockResponse(currentInput, currentTopic);
       setMessages(prev => prev.map(m =>
@@ -246,7 +297,14 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
       >
-        {isOpen ? <FiX size={24} /> : <FiMessageCircle size={24} />}
+        {isOpen ? <FiX size={24} /> : (
+          <div className="relative">
+            <span className="text-2xl">🤖</span>
+            {isInPracticeMode && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-purple-600" />
+            )}
+          </div>
+        )}
       </button>
 
       {/* Chat Window */}
@@ -264,24 +322,34 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
                   {isAIEnabled ? (
                     <>
                       <span className="w-2 h-2 bg-green-400 rounded-full inline-block" />
-                      {PROVIDER_INFO[config.provider].name} • {config.modelId.split('/').pop()?.split('-').slice(0, 2).join(' ')}
+                      {PROVIDER_INFO[config.provider].name}
                     </>
                   ) : (
                     <>
                       <span className="w-2 h-2 bg-yellow-400 rounded-full inline-block" />
-                      Mock mode — connect real AI in settings
+                      Mock mode
                     </>
+                  )}
+                  {isInPracticeMode && (
+                    <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded text-[10px]">Practice</span>
                   )}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <button
+                onClick={onOpenReport}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                title="Weekly Report"
+              >
+                <FiBarChart2 size={16} />
+              </button>
+              <button
                 onClick={onOpenSettings}
                 className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                 title="AI Settings"
               >
-                <FiSettings size={18} />
+                <FiSettings size={16} />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
@@ -292,6 +360,15 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
               </button>
             </div>
           </div>
+
+          {/* Context Banner */}
+          {(currentTopic || currentUnit) && (
+            <div className="px-4 py-2 bg-purple-50 border-b border-purple-100 text-xs text-purple-700">
+              <span className="font-medium">📍 Current context:</span>{' '}
+              {currentUnit && <span>{currentUnit} → </span>}
+              {currentTopic && <span className="font-medium">{currentTopic}</span>}
+            </div>
+          )}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -307,7 +384,6 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
                       : 'bg-gray-100 text-gray-800 rounded-bl-md'
                   }`}
                 >
-                  {/* Image preview */}
                   {msg.imageData && (
                     <div className="p-2">
                       <img
@@ -317,7 +393,6 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
                       />
                     </div>
                   )}
-                  {/* Text content */}
                   <div className="p-3">
                     {msg.isLoading ? (
                       <div className="flex items-center gap-2">
@@ -334,16 +409,22 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
                         <div>
                           <p className="text-red-600 text-sm font-medium">Error</p>
                           <p className="text-red-500 text-xs">{msg.error}</p>
-                          <button
-                            onClick={onOpenSettings}
-                            className="text-xs text-purple-600 underline mt-1"
-                          >
+                          <button onClick={onOpenSettings} className="text-xs text-purple-600 underline mt-1">
                             Check settings
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      <>
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                        {msg.extractedAnswer && isInPracticeMode && (
+                          <div className="mt-2 bg-green-100 border border-green-300 rounded-lg p-2 text-xs text-green-800">
+                            ✅ Answer extracted: <strong>{msg.extractedAnswer}</strong>
+                            <br />
+                            <span className="text-green-600">→ Filled in the answer box above!</span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -356,11 +437,7 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
           {attachedImage && (
             <div className="px-3 pb-2">
               <div className="relative inline-block">
-                <img
-                  src={attachedImage}
-                  alt="To send"
-                  className="h-20 rounded-lg border-2 border-purple-300 object-contain"
-                />
+                <img src={attachedImage} alt="To send" className="h-20 rounded-lg border-2 border-purple-300 object-contain" />
                 <button
                   onClick={() => setAttachedImage(null)}
                   className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
@@ -368,6 +445,9 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
                   ×
                 </button>
               </div>
+              {isInPracticeMode && (
+                <p className="text-xs text-purple-600 mt-1">📸 AI will read this and fill your answer box!</p>
+              )}
             </div>
           )}
 
@@ -378,14 +458,11 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
                 <FiZap className="text-amber-500 flex-shrink-0" size={14} />
                 <p className="text-xs text-amber-700">
                   Connect a real AI for smart responses & image reading.
-                  <button onClick={onOpenSettings} className="underline font-medium ml-1">
-                    Set up now
-                  </button>
+                  <button onClick={onOpenSettings} className="underline font-medium ml-1">Set up</button>
                 </p>
               </div>
             )}
             <div className="flex gap-2 items-end">
-              {/* Image buttons */}
               <div className="flex gap-1">
                 <button
                   onClick={() => cameraInputRef.current?.click()}
@@ -402,29 +479,15 @@ export default function AIChatbot({ currentTopic, currentUnit, config, isAIEnabl
                   <FiImage size={18} />
                 </button>
               </div>
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handleImageAttach}
-                className="hidden"
-              />
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageAttach}
-                className="hidden"
-              />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleImageAttach} className="hidden" />
+              <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageAttach} className="hidden" />
 
-              {/* Text input */}
               <input
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                placeholder={isAIEnabled ? "Ask anything or send an image..." : "Ask me anything..."}
+                placeholder={isInPracticeMode ? "Ask or snap your answer..." : "Ask anything..."}
                 className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
               <button

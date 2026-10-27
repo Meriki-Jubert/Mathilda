@@ -8,6 +8,7 @@ interface LearningTreeProps {
   isSkillUnlocked: (skillIndex: number, allSkillIds: string[]) => boolean;
   onSelectSkill: (unitId: string, skillId: string) => void;
   totalXP: number;
+  streakDays?: number;
 }
 
 export default function LearningTree({
@@ -17,6 +18,7 @@ export default function LearningTree({
   isSkillUnlocked,
   onSelectSkill,
   totalXP,
+  streakDays = 0,
 }: LearningTreeProps) {
   const allSkillIds = units.flatMap(u => u.skills.map(s => s.id));
 
@@ -36,9 +38,17 @@ export default function LearningTree({
               <h1 className="text-2xl font-bold text-gray-800">🌳 Math Mastery Tree</h1>
               <p className="text-sm text-gray-500">HND Discrete Mathematics</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500">Total XP</p>
-              <p className="text-xl font-bold text-purple-600">{totalXP} ⭐</p>
+            <div className="flex items-center gap-4">
+              {streakDays > 0 && (
+                <div className="text-right">
+                  <p className="text-sm text-gray-500">Streak</p>
+                  <p className="text-xl font-bold text-orange-500">🔥 {streakDays}</p>
+                </div>
+              )}
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Total XP</p>
+                <p className="text-xl font-bold text-purple-600">{totalXP} ⭐</p>
+              </div>
             </div>
           </div>
           {/* Overall progress */}
