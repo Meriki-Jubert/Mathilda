@@ -1,49 +1,46 @@
-# Implementation Plan: Firebase Database & Real-Time Cross-Device Sync
+# Implementation Plan - Dedicated Mobile Codebase (/mobile) with Shared Firestore Database
 
-Enable persistent cloud storage and real-time cross-device synchronization for **Mathilda: The Jungle of Equations** using **Firebase Firestore** and **Firebase Authentication**.
-
----
-
-## 1. Firebase Provisioning & Integration Setup
-
-1. **Trigger Firebase Provisioning**:
-   - Call `set_up_firebase` with `platform: "web"`, `requestedProducts: ["firestore"]`, and `userConfirmedTermsAcceptedInUI: false` to initiate the Firebase approval prompt in the UI.
-   - Upon user acceptance, call `set_up_firebase` with `userConfirmedTermsAcceptedInUI: true`.
-2. **Schema & Security Rules**:
-   - Create `firebase-blueprint.json` defines schemas for `users/{userId}`:
-     - `completedSkills`: string[] (completed module IDs)
-     - `skillProgress`: map of skill ID to `{ lessonsCompleted: string[], practiceCompleted: string[] }`
-     - `harvestedFruits`: string[] (collected Knowledge Fruit IDs)
-     - `stamina`: number (current Expedition Stamina points)
-     - `totalXP`: number (accumulated mastery XP)
-     - `streakDays`: number
-     - `updatedAt`: timestamp
-   - Create `firestore.rules` enforcing that users can only read and write their own document (`request.auth.uid == userId`).
+Build a completely separate mobile application inside `/mobile` with a native mobile UI layout (bottom navigation tabs, touch cards, mobile camera integration) while preserving the web app in `/src`. Both applications connect to the exact same live Firestore database (`ai-studio-mathilda-70865838-0d04-4e91-897c-ed47eb9890c1`), ensuring seamless real-time state and AI API configuration synchronization across web and mobile devices.
 
 ---
 
-## 2. Authentication & Account Sync Modal
+## Architecture & Requirements
 
-- **Anonymous Guest Sign-In**: Automatically sign in users as guest explorers on first launch so they can start immediately without friction.
-- **Account Sync Modal (`src/components/AccountSyncModal.tsx`)**:
-  - Accessible via a new **Cloud Sync ☁️** button in the header bar.
-  - Allows guest users to link an Email/Password or Google account to preserve their Knowledge Fruits, Stamina, and progress across multiple phones, laptops, and tablets.
-  - Displays connection status (Offline Local vs. Cloud Synced).
+### 1. Dedicated Mobile Codebase Directory (`/mobile`)
+- Create a standalone mobile application structure inside `/mobile` with its own entry point, components, navigation, and hooks.
+- **Mobile-Tailored UI**: Built from the ground up for mobile screens with:
+  - **Bottom Navigation Bar**: 4 core tabs (🌴 Syllabus Map, 📝 Practice & AI Snap, 🎒 Backpack & Vault, ⚙️ Cloud Sync & AI Config).
+  - **Mobile Touch Cards**: Stacked viewports, native-feeling gestures, and camera button for snapping handwritten math problems.
+  - **Compact Mobile Modals**: Drawer-style sheets and full-width mobile popups.
+
+### 2. Shared Firestore & Auth Data Layer
+- Re-use the existing Firebase project configuration (`firebase-applet-config.json` and Firestore database `ai-studio-mathilda-70865838-0d04-4e91-897c-ed47eb9890c1`).
+- Connect the `/mobile` application directly to Firestore so progress, XP, completed skills, stamina, harvested fruits, and AI API keys sync automatically between the web app and the mobile app.
+
+### 3. Web App Mobile Preview & Switcher
+- Keep the web app in `/src` completely unchanged and separate.
+- Add an interactive **Mobile App Studio Switcher** toggle/modal in the web header allowing the user to view, test, and interact with the `/mobile` app codebase in an emulator frame or switch directly to mobile code view.
 
 ---
 
-## 3. Real-Time Synchronization Hook (`useFirebaseSync`)
+## User Review & Verification
 
-- Create `src/hooks/useFirebaseSync.ts`:
-  - Uses Firestore `onSnapshot` to listen for real-time progress updates across devices.
-  - Merges local `localStorage` offline progress seamlessly when signing in.
-  - Updates harvested Knowledge Fruits, Stamina, completed lessons, and practice scores immediately in Firestore.
+### Proposed File Structure
+```
+/app
+├── /src                    <-- Existing Web Codebase (Unchanged)
+├── /mobile                 <-- Separate Standalone Mobile App Codebase
+│   ├── App.tsx             <-- Mobile Root with Bottom Navigation
+│   ├── index.css           <-- Mobile Styling & Touch Layouts
+│   ├── /components         <-- Mobile Views (MobileMap, MobilePractice, MobileBackpack, MobileSync)
+│   ├── /hooks              <-- Mobile Hooks (useMobileSync, useMobileProgress)
+│   └── /services           <-- Mobile Shared Firebase Config
+├── firebase-applet-config.json
+├── firestore.rules
+└── package.json
+```
 
----
-
-## 4. Verification Plan
-
-1. Initiate `set_up_firebase` tool call and prompt user for UI confirmation.
-2. After provisioning, test Firebase initialization and Firestore security rules validation.
-3. Test guest login, data persistence, and cross-device sync updates.
-4. Verify with `compile_applet` to confirm zero build errors.
+### Verification Plan
+1. Compile the applet with `compile_applet` to ensure both web and mobile components compile cleanly.
+2. Verify type safety with `npm run typecheck`.
+3. Test two-way real-time data sync in the preview to confirm changes made in the mobile app reflect instantly in the web app and Firestore.

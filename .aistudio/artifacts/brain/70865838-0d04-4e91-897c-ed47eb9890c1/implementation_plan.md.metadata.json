@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan for provisioning Firebase Firestore database and Authentication to enable real-time cross-device syncing of lesson progress, harvested Knowledge Fruits, Expedition Stamina, and AI tutor logs.",
-  "updatedAt":  "2026-10-27T21:52:48.925388829Z",
+  "summary":  "Revised implementation plan to build a completely separate mobile codebase in a dedicated /mobile directory with a native mobile UI and bottom navigation tabs sharing the same Firestore database.",
+  "updatedAt":  "2026-10-28T01:23:07.378781801Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

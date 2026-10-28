@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { FiBook, FiFileText, FiBookmark, FiSliders, FiBarChart2, FiSettings, FiCloud } from 'react-icons/fi';
+import { FiBook, FiFileText, FiBookmark, FiSliders, FiBarChart2, FiSettings, FiCloud, FiSmartphone, FiMonitor } from 'react-icons/fi';
+import MobileApp from '../mobile/MobileApp';
 import { curriculum } from './data/curriculum';
 import { useProgress } from './hooks/useProgress';
 import { useFirebaseSync } from './hooks/useFirebaseSync';
@@ -63,6 +64,7 @@ function App() {
   const [reportOpen, setReportOpen] = useState(false);
   const [backpackOpen, setBackpackOpen] = useState(false);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
+  const [isMobileViewActive, setIsMobileViewActive] = useState(false);
 
   // Sync cloud state into local progress & AI config on cloud document load
   useEffect(() => {
@@ -424,6 +426,17 @@ function App() {
               <FiCloud size={13} className={isSyncing ? 'animate-spin text-amber-400' : 'text-emerald-400'} />
               <span className="hidden md:inline font-mono text-[11px]">Sync State</span>
             </button>
+
+            <button
+              onClick={() => setIsMobileViewActive(!isMobileViewActive)}
+              className="px-2.5 py-1.5 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/50 rounded font-bold transition-all flex items-center gap-1.5 ml-1 shadow-xs"
+              title="Switch to Mobile Native App Codebase"
+            >
+              {isMobileViewActive ? <FiMonitor size={13} className="text-amber-300" /> : <FiSmartphone size={13} className="text-emerald-400" />}
+              <span className="font-mono text-[11px]">
+                {isMobileViewActive ? 'Web Platform' : '📱 Mobile App View'}
+              </span>
+            </button>
           </nav>
         </header>
       )}
@@ -462,9 +475,15 @@ function App() {
         </div>
       )}
 
-      {renderView()}
+      {isMobileViewActive ? (
+        <div className="py-4">
+          <MobileApp />
+        </div>
+      ) : (
+        renderView()
+      )}
 
-      {viewState.view !== 'welcome' && (
+      {viewState.view !== 'welcome' && !isMobileViewActive && (
         <AIChatbot
           currentTopic={getCurrentTopic()}
           currentUnit={getCurrentUnitTitle()}
