@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface SkillProgress {
   skillId: string;
@@ -138,8 +138,40 @@ export function useProgress() {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  const mergeCloudProgress = useCallback((cloudData: Partial<UserProgress>) => {
+    setProgress(prev => {
+      const mergedCompletedSkills = Array.from(new Set([...prev.completedSkills, ...(cloudData.completedSkills || [])]));
+      const mergedSkillProgress = {
+        ...prev.skillProgress,
+        ...(cloudData.skillProgress || {}),
+      };
+      const mergedUnit = cloudData.currentUnit || prev.currentUnit;
+      const mergedSkill = cloudData.currentSkill || prev.currentSkill;
+      const mergedXP = Math.max(prev.totalXP, cloudData.totalXP || 0);
+
+      const isUnchanged =
+        JSON.stringify(mergedCompletedSkills) === JSON.stringify(prev.completedSkills) &&
+        JSON.stringify(mergedSkillProgress) === JSON.stringify(prev.skillProgress) &&
+        mergedUnit === prev.currentUnit &&
+        mergedSkill === prev.currentSkill &&
+        mergedXP === prev.totalXP;
+
+      if (isUnchanged) return prev;
+
+      return {
+        completedSkills: mergedCompletedSkills,
+        skillProgress: mergedSkillProgress,
+        currentUnit: mergedUnit,
+        currentSkill: mergedSkill,
+        totalXP: mergedXP,
+      };
+    });
+  }, []);
+
   return {
     progress,
+    setProgress,
+    mergeCloudProgress,
     completeLesson,
     completePractice,
     unlockSkill,
@@ -150,3 +182,4 @@ export function useProgress() {
     resetProgress,
   };
 }
+

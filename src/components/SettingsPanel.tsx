@@ -17,9 +17,11 @@ export default function SettingsPanel({ isOpen, onClose, config, onSave }: Setti
   const [showKey, setShowKey] = useState(false);
 
   useEffect(() => {
-    setLocalConfig(config);
-    setTestResult(null);
-  }, [config, isOpen]);
+    if (isOpen) {
+      setLocalConfig(config);
+      setTestResult(null);
+    }
+  }, [isOpen]);
 
   const handleProviderChange = (provider: AIProvider) => {
     const models = getModelsForProvider(provider);

@@ -1,71 +1,49 @@
-# Implementation Plan: Mathilda — The Jungle of Equations Expedition
+# Implementation Plan: Firebase Database & Real-Time Cross-Device Sync
 
-Transform Mathilda into an authentic, human-centered **Jungle Expedition Experience** where discrete and applied mathematics for Cameroon HND is a wild, uncharted jungle to be explored. You navigate through 12 lush jungle zones, harvest collectible Knowledge Fruits, track your Expedition Stamina, and unlock the Secret Past Paper Vault.
-
----
-
-## 1. Narrative & Gamified Progress Mechanics
-
-- **The Mathilda Jungle Expedition Story**: You are an explorer navigating the overgrown *Mathilda Jungle*. Each unit is a distinct jungle biome:
-  - *Zone 1: The Survival Clearing* (Basics & Negatives)
-  - *Zone 2: The Whispering Limits Canopy* (Limits & Continuity)
-  - *Zone 3: The Grove of Chance* (Probability & Counting)
-  - *Zone 4: The Plateau of Statistics* (Data & Frequency Tables)
-  - *Zone 5: The River of Calculus* (Derivatives & Integrals)
-  - *Zone 6: The Vector Ridge & Laplace Cascades* (Vectors & Transforms)
-  - *Zone 7: The Trial of the Bosses* (Exam Deconstruction)
-  - *Zone 8: The Ruined Temple of Complex Phasors* (Complex Numbers)
-  - *Zone 9: The Fortress of Matrices* (Linear Systems & Cramer's Rule)
-  - *Zone 10: The Cavern of Partial Fractions* (Integration Techniques)
-  - *Zone 11: The Oscillating Canopy* (ODEs & Fourier Series)
-  - *Zone 12: The Valley of Numerical Methods* (Trapezoidal, Simpson, Newton-Raphson)
-- **Collectible Knowledge Fruits**: Completing lessons and problem sets awards regional fruits (*Golden Mango of Calculus*, *Starfruit of Laplace*, *Crystal Guava of Complex Phasors*, *Papaya of Matrices*, *Passionfruit of ODEs*).
-- **Expedition Backpack & Secret Vaults**: Collectible fruits fill your **Expedition Backpack** and boost your **Jungle Stamina**. Accumulating fruits unlocks secret past paper vaults in the HND Exam Temple.
+Enable persistent cloud storage and real-time cross-device synchronization for **Mathilda: The Jungle of Equations** using **Firebase Firestore** and **Firebase Authentication**.
 
 ---
 
-## 2. Visual Palette & Organic Aesthetics
+## 1. Firebase Provisioning & Integration Setup
 
-- **Canvas & Palette**: Warm parchment expedition map background (`#FDFBF7`), deep moss canopy (`#064E3B` / `#022C22`), sunlit clearing gold (`#D97706`), earthy bark (`#78350F`), and lush emerald green (`#059669`).
-- **Texture & Shapes**: Stone tablet borders, hand-drawn trail lines, vine-wrapped progress meters, and organic badge shapes.
-- **Typography**: Clean readable sans-serif for story copy, Newsreader serif for mathematical expressions and field journal entries, and JetBrains Mono for coordinates, stamina scores, and equations.
+1. **Trigger Firebase Provisioning**:
+   - Call `set_up_firebase` with `platform: "web"`, `requestedProducts: ["firestore"]`, and `userConfirmedTermsAcceptedInUI: false` to initiate the Firebase approval prompt in the UI.
+   - Upon user acceptance, call `set_up_firebase` with `userConfirmedTermsAcceptedInUI: true`.
+2. **Schema & Security Rules**:
+   - Create `firebase-blueprint.json` defines schemas for `users/{userId}`:
+     - `completedSkills`: string[] (completed module IDs)
+     - `skillProgress`: map of skill ID to `{ lessonsCompleted: string[], practiceCompleted: string[] }`
+     - `harvestedFruits`: string[] (collected Knowledge Fruit IDs)
+     - `stamina`: number (current Expedition Stamina points)
+     - `totalXP`: number (accumulated mastery XP)
+     - `streakDays`: number
+     - `updatedAt`: timestamp
+   - Create `firestore.rules` enforcing that users can only read and write their own document (`request.auth.uid == userId`).
 
 ---
 
-## 3. Core Component Architecture & Upgrades
+## 2. Authentication & Account Sync Modal
 
-### `src/data/jungleLore.ts`
-- Stores fruit definitions, zone descriptions, explorer log entries, stamina formulas, and backpack item inventories.
+- **Anonymous Guest Sign-In**: Automatically sign in users as guest explorers on first launch so they can start immediately without friction.
+- **Account Sync Modal (`src/components/AccountSyncModal.tsx`)**:
+  - Accessible via a new **Cloud Sync ☁️** button in the header bar.
+  - Allows guest users to link an Email/Password or Google account to preserve their Knowledge Fruits, Stamina, and progress across multiple phones, laptops, and tablets.
+  - Displays connection status (Offline Local vs. Cloud Synced).
 
-### `src/components/LearningTree.tsx` (The Jungle Expedition Map)
-- Interactive expedition trail map connecting all 12 zones with winding vine paths.
-- Zone progress bars, canopy milestones, and fruit tree indicators.
-- Quick access to the Expedition Backpack and Stamina status.
+---
 
-### `src/components/SkillHub.tsx` (Jungle Trailhead & Fruit Grove)
-- Framer Motion staggered trail markers for lessons and practice problems.
-- Animated fruit harvesting alert when completing lessons or solving problems.
+## 3. Real-Time Synchronization Hook (`useFirebaseSync`)
 
-### `src/components/LessonView.tsx` (Explorer's Field Journal)
-- Formatted like a handwritten explorer's notebook entry with story context ("Field Notes"), core formulas carved into stone tablets, and step-by-step worked solutions.
-
-### `src/components/PracticeView.tsx` (Jungle Trial & Fruit Discovery)
-- Practice problems styled as jungle obstacles.
-- Correct answers yield harvestable Knowledge Fruits with animation and stamina boosts.
-
-### `src/components/HndExamBankView.tsx` (The Secret Past Paper Vault)
-- Unlocked via harvested fruits. Features authentic 10-mark Cameroon HND past exam questions with step-by-step marking schemes.
-
-### `src/components/BackpackModal.tsx` (Expedition Backpack & Fruit Collection)
-- Interactive inventory displaying harvested Knowledge Fruits, Stamina boost level, unlocked exam vaults, and exploration badges.
-
-### `src/components/WelcomeScreen.tsx` (The Expedition Entrance)
-- Evocative narrative introduction to the Mathilda Jungle expedition.
+- Create `src/hooks/useFirebaseSync.ts`:
+  - Uses Firestore `onSnapshot` to listen for real-time progress updates across devices.
+  - Merges local `localStorage` offline progress seamlessly when signing in.
+  - Updates harvested Knowledge Fruits, Stamina, completed lessons, and practice scores immediately in Firestore.
 
 ---
 
 ## 4. Verification Plan
 
-1. Compile applet using `compile_applet` to ensure zero build or syntax errors.
-2. Verify Framer Motion staggered animations, fruit harvesting triggers, and inventory tracking.
-3. Test seamless navigation between Syllabus Map, Past Paper Vault, Formula Handbook, Solvers, and Expedition Backpack.
+1. Initiate `set_up_firebase` tool call and prompt user for UI confirmation.
+2. After provisioning, test Firebase initialization and Firestore security rules validation.
+3. Test guest login, data persistence, and cross-device sync updates.
+4. Verify with `compile_applet` to confirm zero build errors.

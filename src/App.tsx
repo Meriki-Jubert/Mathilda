@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { FiBook, FiFileText, FiBookmark, FiSliders, FiBarChart2, FiSettings } from 'react-icons/fi';
+import { FiBook, FiFileText, FiBookmark, FiSliders, FiBarChart2, FiSettings, FiCloud } from 'react-icons/fi';
 import { curriculum } from './data/curriculum';
 import { useProgress } from './hooks/useProgress';
+import { useFirebaseSync } from './hooks/useFirebaseSync';
 import { useAIConfig } from './hooks/useAIConfig';
 import { useAnalytics } from './hooks/useAnalytics';
 import LearningTree from './components/LearningTree';
@@ -16,6 +17,7 @@ import HndExamBankView from './components/HndExamBankView';
 import HndFormulaSheetView from './components/HndFormulaSheetView';
 import HndSolversView from './components/HndSolversView';
 import BackpackModal from './components/BackpackModal';
+import AccountSyncModal from './components/AccountSyncModal';
 
 type View = 'welcome' | 'tree' | 'skill-hub' | 'lesson' | 'practice' | 'hnd-exams' | 'hnd-formulas' | 'hnd-solvers';
 
@@ -29,6 +31,7 @@ interface ViewState {
 function App() {
   const {
     progress,
+    mergeCloudProgress,
     completeLesson,
     completePractice,
     unlockSkill,
@@ -36,12 +39,64 @@ function App() {
     getSkillMastery,
   } = useProgress();
 
-  const { config: aiConfig, updateConfig: updateAIConfig, isAIEnabled } = useAIConfig();
+  const {
+    currentUser,
+    isSyncing,
+    syncError,
+    syncedState,
+    saveProgressToCloud,
+    saveAIConfigToCloud,
+    loginWithGoogle,
+    logout,
+  } = useFirebaseSync();
+
+  const {
+    config: aiConfig,
+    updateConfig: updateAIConfig,
+    mergeCloudAIConfig,
+    isAIEnabled,
+  } = useAIConfig(saveAIConfigToCloud);
+
   const analytics = useAnalytics();
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [backpackOpen, setBackpackOpen] = useState(false);
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
+
+  // Sync cloud state into local progress & AI config on cloud document load
+  useEffect(() => {
+    if (syncedState) {
+      mergeCloudProgress(syncedState);
+      if (syncedState.aiConfig) {
+        mergeCloudAIConfig(syncedState.aiConfig);
+      }
+    }
+  }, [syncedState, mergeCloudProgress, mergeCloudAIConfig]);
+
+  // Persist local progress updates to Firestore in real time
+  const prevSavedRef = useRef<string>('');
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const currentPayload = {
+      completedSkills: progress.completedSkills,
+      skillProgress: progress.skillProgress,
+      currentUnit: progress.currentUnit,
+      currentSkill: progress.currentSkill,
+      totalXP: progress.totalXP,
+      aiConfig,
+    };
+
+    const currentPayloadStr = JSON.stringify(currentPayload);
+    if (currentPayloadStr === prevSavedRef.current) {
+      return;
+    }
+
+    prevSavedRef.current = currentPayloadStr;
+    saveProgressToCloud(currentPayload);
+  }, [progress, aiConfig, currentUser, saveProgressToCloud]);
 
   const [viewState, setViewState] = useState<ViewState>(() => {
     const hasProgress = localStorage.getItem('math-mastery-progress');
@@ -360,6 +415,15 @@ function App() {
               <FiSliders size={13} />
               <span>Solvers</span>
             </button>
+
+            <button
+              onClick={() => setSyncModalOpen(true)}
+              className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 border border-amber-500/30 rounded font-semibold transition-all flex items-center gap-1.5 ml-1"
+              title="Cloud Database Sync"
+            >
+              <FiCloud size={13} className={isSyncing ? 'animate-spin text-amber-400' : 'text-emerald-400'} />
+              <span className="hidden md:inline font-mono text-[11px]">Sync State</span>
+            </button>
           </nav>
         </header>
       )}
@@ -367,6 +431,13 @@ function App() {
       {/* Analytics & Settings Controls */}
       {viewState.view !== 'welcome' && (
         <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2">
+          <button
+            onClick={() => setSyncModalOpen(true)}
+            className="p-2.5 bg-slate-900 text-emerald-400 rounded border border-emerald-800/80 shadow-md hover:shadow-lg transition-all hover:scale-105"
+            title="Cloud Device Sync"
+          >
+            <FiCloud size={18} />
+          </button>
           <button
             onClick={() => setBackpackOpen(true)}
             className="p-2.5 bg-amber-900 text-amber-200 rounded border border-amber-700 shadow-md hover:shadow-lg transition-all hover:scale-105"
@@ -429,6 +500,18 @@ function App() {
         completedSkills={progress.completedSkills}
         totalXP={progress.totalXP}
         onNavigateToExams={() => setViewState({ view: 'hnd-exams' })}
+      />
+
+      <AccountSyncModal
+        isOpen={syncModalOpen}
+        onClose={() => setSyncModalOpen(false)}
+        currentUser={currentUser}
+        isSyncing={isSyncing}
+        syncError={syncError}
+        onLoginWithGoogle={loginWithGoogle}
+        onLogout={logout}
+        totalXP={progress.totalXP}
+        completedSkillsCount={progress.completedSkills.length}
       />
     </div>
   );
