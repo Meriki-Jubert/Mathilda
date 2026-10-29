@@ -42,15 +42,18 @@ export function useFirebaseSync() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
-  // Auto sign-in anonymously if no user is present so syncing works out of the box
+  // Auto sign-in anonymously if supported, or operate in clean local mode
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (!user) {
         try {
           await signInAnonymously(auth);
-        } catch (err) {
-          console.warn('Anonymous sign-in deferred:', err);
+        } catch (err: any) {
+          // Anonymous auth is restricted in Firebase console by default; silently fallback to local mode
+          if (err?.code !== 'auth/admin-restricted-operation') {
+            console.debug('Anonymous sign-in deferred:', err?.message || err);
+          }
         }
       }
       setAuthLoading(false);
@@ -198,9 +201,15 @@ export function useFirebaseSync() {
   const logout = async () => {
     try {
       await firebaseSignOut(auth);
-      await signInAnonymously(auth);
+      try {
+        await signInAnonymously(auth);
+      } catch (err: any) {
+        if (err?.code !== 'auth/admin-restricted-operation') {
+          console.debug('Logout anonymous notice:', err?.message || err);
+        }
+      }
     } catch (err) {
-      console.warn('Logout notice:', err);
+      console.debug('Logout notice:', err);
     }
   };
 

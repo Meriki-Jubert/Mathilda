@@ -46,15 +46,17 @@ export function useMobileSync() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
-  // Auto sign-in anonymously on mobile launch if not authenticated
+  // Auto sign-in anonymously on mobile launch if supported, or operate in local mode
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (!user) {
         try {
           await signInAnonymously(auth);
-        } catch (err) {
-          console.warn('Mobile anonymous auth deferred:', err);
+        } catch (err: any) {
+          if (err?.code !== 'auth/admin-restricted-operation') {
+            console.debug('Mobile anonymous auth deferred:', err?.message || err);
+          }
         }
       }
       setAuthLoading(false);
@@ -138,9 +140,15 @@ export function useMobileSync() {
   const logout = async () => {
     try {
       await firebaseSignOut(auth);
-      await signInAnonymously(auth);
+      try {
+        await signInAnonymously(auth);
+      } catch (err: any) {
+        if (err?.code !== 'auth/admin-restricted-operation') {
+          console.debug('Mobile logout anonymous notice:', err?.message || err);
+        }
+      }
     } catch (err) {
-      console.warn('Mobile logout notice:', err);
+      console.debug('Mobile logout notice:', err);
     }
   };
 
