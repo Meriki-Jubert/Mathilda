@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { FiCloud, FiCheckCircle, FiRefreshCw, FiUser, FiLogOut, FiKey, FiSave } from 'react-icons/fi';
+import { PWAInstallButton } from '../../src/components/PWAInstallButton';
 
 interface MobileSettingsViewProps {
   currentUser: User | null;
@@ -42,6 +43,19 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
           <h2 className="text-base font-bold">Cloud Sync & AI Key Config</h2>
         </div>
         <FiCloud className="text-emerald-400 text-xl" />
+      </div>
+
+      {/* PWA Direct Installation Card */}
+      <div className="bg-gradient-to-br from-emerald-900 to-slate-900 text-white p-4 rounded-xl shadow-sm border border-emerald-700/60 space-y-2">
+        <h3 className="font-bold text-sm flex items-center gap-2">
+          📱 Native App Installation
+        </h3>
+        <p className="text-xs text-emerald-100/90 leading-relaxed">
+          Install Mathilda directly to your Android or iOS device home screen for fullscreen native feel and offline access.
+        </p>
+        <div className="pt-1">
+          <PWAInstallButton variant="full" />
+        </div>
       </div>
 
       {/* Database connection banner */}
@@ -136,3 +150,4 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
     </div>
   );
 };
+

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="jungle_emerald_primary">#047857</color>
+    <color name="jungle_emerald_dark">#022C22</color>
+    <color name="jungle_gold">#EAB308</color>
+    <color name="jungle_gold_light">#FEF08A</color>
+    <color name="slate_dark">#0F172A</color>
+    <color name="amber_accent">#D97706</color>
+</resources>

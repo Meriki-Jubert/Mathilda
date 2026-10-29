@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Mathilda HND</string>
+    <string name="app_tagline">Cameroon HND Mathematics Expedition</string>
+    <string name="nav_syllabus">Syllabus</string>
+    <string name="nav_practice">Practice</string>
+    <string name="nav_backpack">Backpack</string>
+    <string name="nav_settings">Settings</string>
+</resources>

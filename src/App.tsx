@@ -19,6 +19,7 @@ import HndFormulaSheetView from './components/HndFormulaSheetView';
 import HndSolversView from './components/HndSolversView';
 import BackpackModal from './components/BackpackModal';
 import AccountSyncModal from './components/AccountSyncModal';
+import { PWAInstallButton } from './components/PWAInstallButton';
 
 type View = 'welcome' | 'tree' | 'skill-hub' | 'lesson' | 'practice' | 'hnd-exams' | 'hnd-formulas' | 'hnd-solvers';
 
@@ -437,6 +438,10 @@ function App() {
                 {isMobileViewActive ? 'Web Platform' : '📱 Mobile App View'}
               </span>
             </button>
+
+            <div className="ml-1">
+              <PWAInstallButton variant="compact" />
+            </div>
           </nav>
         </header>
       )}
