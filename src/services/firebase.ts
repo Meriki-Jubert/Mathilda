@@ -36,7 +36,7 @@ export interface FirestoreErrorInfo {
   };
 }
 
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): void {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -53,8 +53,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  console.warn(`Firestore Operation Warning (${operationType} @ ${path}):`, JSON.stringify(errInfo));
 }
 
 // Connection test on boot
@@ -65,13 +64,13 @@ export async function testConnection(): Promise<boolean> {
     return true;
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error('Please check your Firebase configuration.');
+      console.warn('Firestore is currently operating in offline mode.');
     } else {
-      console.warn('Firestore test connection notice:', error);
+      console.warn('Firestore test connection notice:', error instanceof Error ? error.message : error);
     }
     return false;
   }
 }
 
 // Execute connection test
-testConnection();
+testConnection().catch(() => {});

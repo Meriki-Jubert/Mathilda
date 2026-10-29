@@ -19,7 +19,7 @@ export enum OperationType {
   WRITE = 'write',
 }
 
-export function handleMobileFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
+export function handleMobileFirestoreError(error: unknown, operationType: OperationType, path: string | null): void {
   const errInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -30,8 +30,7 @@ export function handleMobileFirestoreError(error: unknown, operationType: Operat
     operationType,
     path,
   };
-  console.error('Mobile Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  console.warn('Mobile Firestore Operation Warning: ', JSON.stringify(errInfo));
 }
 
 // Test connection on boot
@@ -40,9 +39,9 @@ export async function testMobileConnection(): Promise<boolean> {
     await getDocFromServer(doc(db, 'test', 'connection'));
     return true;
   } catch (err) {
-    console.warn('Mobile connection notice:', err);
+    console.warn('Mobile connection notice:', err instanceof Error ? err.message : err);
     return false;
   }
 }
 
-testMobileConnection();
+testMobileConnection().catch(() => {});

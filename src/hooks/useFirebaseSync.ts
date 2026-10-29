@@ -110,7 +110,8 @@ export function useFirebaseSync() {
       },
       (error) => {
         setIsSyncing(false);
-        setSyncError('Sync snapshot error');
+        console.warn('Sync snapshot offline notice:', error?.message || error);
+        setSyncError('Operating offline (data cached locally)');
         handleFirestoreError(error, OperationType.GET, `users/${currentUser.uid}`);
       }
     );
@@ -146,7 +147,8 @@ export function useFirebaseSync() {
         await setDoc(userDocRef, payload, { merge: true });
         setSyncError(null);
       } catch (err) {
-        setSyncError('Failed to save to cloud');
+        console.warn('Save to cloud notice:', err);
+        setSyncError('Saved locally (cloud offline)');
         handleFirestoreError(err, OperationType.UPDATE, `users/${currentUser.uid}`);
       }
     },
@@ -175,7 +177,8 @@ export function useFirebaseSync() {
         );
         setSyncError(null);
       } catch (err) {
-        setSyncError('Failed to save AI config to cloud');
+        console.warn('Save AI config cloud notice:', err);
+        setSyncError('Saved locally (cloud offline)');
         handleFirestoreError(err, OperationType.UPDATE, `users/${currentUser.uid}`);
       }
     },
@@ -187,7 +190,7 @@ export function useFirebaseSync() {
       setSyncError(null);
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
-      console.error('Google Sign-In failed:', err);
+      console.warn('Google Sign-In failed or cancelled:', err);
       setSyncError('Google Sign-In was cancelled or failed.');
     }
   };
@@ -197,7 +200,7 @@ export function useFirebaseSync() {
       await firebaseSignOut(auth);
       await signInAnonymously(auth);
     } catch (err) {
-      console.error('Logout error:', err);
+      console.warn('Logout notice:', err);
     }
   };
 

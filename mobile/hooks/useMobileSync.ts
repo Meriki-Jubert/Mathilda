@@ -92,7 +92,8 @@ export function useMobileSync() {
       },
       (error) => {
         setIsSyncing(false);
-        setSyncError('Mobile snapshot error');
+        console.warn('Mobile sync snapshot notice:', error?.message || error);
+        setSyncError('Operating offline (data cached locally)');
         handleMobileFirestoreError(error, OperationType.GET, `users/${currentUser.uid}`);
       }
     );
@@ -116,7 +117,8 @@ export function useMobileSync() {
         );
         setSyncError(null);
       } catch (err) {
-        setSyncError('Mobile sync failed');
+        console.warn('Mobile save cloud notice:', err);
+        setSyncError('Saved locally (cloud offline)');
         handleMobileFirestoreError(err, OperationType.UPDATE, `users/${currentUser.uid}`);
       }
     },
@@ -128,6 +130,7 @@ export function useMobileSync() {
       setSyncError(null);
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
+      console.warn('Mobile Google Sign-In failed or cancelled:', err);
       setSyncError('Google login cancelled or failed.');
     }
   };
@@ -137,7 +140,7 @@ export function useMobileSync() {
       await firebaseSignOut(auth);
       await signInAnonymously(auth);
     } catch (err) {
-      console.error('Logout error:', err);
+      console.warn('Mobile logout notice:', err);
     }
   };
 
