@@ -27,6 +27,7 @@ import com.mathilda.hndmath.ui.screens.SyllabusMapScreen
 import com.mathilda.hndmath.ui.theme.MathildaHNDTheme
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
 
     private val firebaseRepository = FirebaseRepository()
