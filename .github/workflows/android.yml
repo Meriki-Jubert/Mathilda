@@ -21,14 +21,72 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.5'
 
+      - name: Ensure google-services.json exists
+        run: |
+          mkdir -p mobile/android/app
+          if [ ! -f "mobile/android/app/google-services.json" ]; then
+            echo "Auto-generating google-services.json from Firebase config..."
+            cat << 'EOF' > mobile/android/app/google-services.json
+          {
+            "project_info": {
+              "project_number": "351055887470",
+              "project_id": "infra-principle-v5v9p",
+              "storage_bucket": "infra-principle-v5v9p.firebasestorage.app"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:351055887470:android:0fca9142d6bfbda5bffa7f",
+                  "android_client_info": {
+                    "package_name": "com.mathilda.hndmath"
+                  }
+                },
+                "oauth_client": [
+                  {
+                    "client_id": "351055887470-54q3bngv6ktt7vgsacjh666r01uq16qs.apps.googleusercontent.com",
+                    "client_type": 3
+                  }
+                ],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyC3z-mQzI40GSSzjvYNb4-zYU_ufEQjMQ0"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          fi
+
+      - name: Ensure gradle.properties exists
+        run: |
+          if [ ! -f "mobile/android/gradle.properties" ]; then
+            cat << 'EOF' > mobile/android/gradle.properties
+          org.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          android.nonTransitiveRClass=true
+          kotlin.code.style=official
+          EOF
+          fi
+
       - name: Build Android Debug APK
         run: |
           cd mobile/android
+          chmod +x gradlew || true
           gradle assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK Artifact

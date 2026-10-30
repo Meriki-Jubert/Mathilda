@@ -19,6 +19,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        multiDex = true
     }
 
     buildTypes {
@@ -55,6 +56,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.multidex:multidex:2.0.1")
 
     // Jetpack Compose & Material 3
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
@@ -63,7 +65,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.compose.material:material-icons-extended:1.6.2")
+    implementation("androidx.compose.material:material-icons-extended")
 
     // Firebase Android SDK (Firestore & Auth)
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
